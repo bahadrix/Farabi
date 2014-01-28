@@ -9,14 +9,23 @@
     <version>1.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
+            <!-- Galaxy -->
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <version>2.2.0</version>
         </dependency>
         <dependency>
+            <!-- Mp3 decoding tool -->
             <groupId>de.huxhorn.sulky</groupId>
             <artifactId>de.huxhorn.sulky.3rdparty.jlayer</artifactId>
             <version>1.0</version>
+        </dependency>
+        <dependency>
+            <!-- Our unit test tool -->
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
@@ -41,6 +50,8 @@
                                 <excludes>
                                     <!-- Hadoop libs is already included in running machine's classpath, so exclude them -->
                                     <exclude>org.apache.hadoop</exclude>
+                                    <!-- junit is for test purposes only -->
+                                    <exclude>junit</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>
