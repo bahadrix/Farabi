@@ -8,32 +8,47 @@
     <artifactId>Farabi</artifactId>
     <version>1.0-SNAPSHOT</version>
     <dependencies>
-        <dependency>
-            <!-- Galaxy -->
+        <dependency><!-- Galaxy -->
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <version>2.2.0</version>
         </dependency>
-        <dependency>
-            <!-- Mp3 decoding tool -->
-            <groupId>de.huxhorn.sulky</groupId>
-            <artifactId>de.huxhorn.sulky.3rdparty.jlayer</artifactId>
-            <version>1.0</version>
+        <dependency><!-- Mp3 decoding tool -->
+            <groupId>javazoom</groupId>
+            <artifactId>jlayer</artifactId>
+            <version>1.0.1</version>
         </dependency>
-        <dependency>
-            <!-- Our unit test tool -->
+
+        <dependency><!-- Our unit test tool -->
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
             <scope>test</scope>
+        </dependency>
+        <dependency><!-- for reading mp3 tags -->
+            <groupId>com.mpatric</groupId>
+            <artifactId>mp3agic</artifactId>
+            <version>0.8.2</version>
+        </dependency>
+        <dependency><!-- for serialization -->
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.2.11</version>
         </dependency>
 
     </dependencies>
 
     <build>
         <plugins>
-            <!-- using shade plugin for uber jar -->
-            <plugin>
+            <plugin><!-- needed for debugging in IntelliJ IDEA -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.14</version>
+                <configuration>
+                    <forkMode>never</forkMode>
+                </configuration>
+            </plugin>
+            <plugin><!-- using shade plugin for uber jar -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>2.2</version>
