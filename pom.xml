@@ -18,7 +18,6 @@
             <artifactId>jlayer</artifactId>
             <version>1.0.1</version>
         </dependency>
-
         <dependency><!-- Our unit test tool -->
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -26,18 +25,17 @@
             <scope>test</scope>
         </dependency>
         <dependency><!-- for reading mp3 tags -->
-            <groupId>com.mpatric</groupId>
-            <artifactId>mp3agic</artifactId>
-            <version>0.8.2</version>
+            <groupId>org.blinkenlights.jid3</groupId>
+            <artifactId>JID3</artifactId>
+            <version>0.46</version>
         </dependency>
+
         <dependency><!-- for serialization -->
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.2.11</version>
         </dependency>
-
     </dependencies>
-
     <build>
         <plugins>
             <plugin><!-- needed for debugging in IntelliJ IDEA -->
@@ -75,6 +73,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>

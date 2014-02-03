@@ -7,7 +7,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.farabiproject.audio.AudioReader;
 
 
 
@@ -39,8 +38,6 @@ public class WordCount {
           */
         System.out.println("Job started , bomba clad lanowar..");
 
-        AudioReader ar = new AudioReader();
-
 
         Job job = Job.getInstance(new Configuration());
         job.setJarByClass(WordCount.class);
@@ -51,7 +48,9 @@ public class WordCount {
         job.setReducerClass(SumReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
-        System.exit(job.waitForCompletion(true) ? 0 : 1);
+        System.exit(
+                job.waitForCompletion(true) ? 0 : 1
+        );
 
 
     }
