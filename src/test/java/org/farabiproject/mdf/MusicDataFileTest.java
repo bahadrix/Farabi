@@ -42,9 +42,9 @@ public class MusicDataFileTest {
 
         sampleMDF.setTags(tags);
 
-        sampleMP3Stream = new FileInputStream("target/test-classes/bxblues.mp3");
+        sampleMP3Stream = new FileInputStream("target/test-classes/sample.mp3");
 
-        Assert.assertNotNull("Sample mp3 file 'bxlues.mp3' not found.", sampleMP3Stream);
+        Assert.assertNotNull("Sample mp3 file 'sample.mp3' not found.", sampleMP3Stream);
     }
 
 
