@@ -27,24 +27,16 @@ public class MusicDataFileTest {
     private FileInputStream sampleMP3Stream;
     @Before
     public void createTestData() throws FileNotFoundException, ID3Exception {
-        sampleMDF = new MusicDataFile();
-        sampleMDF.setFrames(new short[]{123, 6468, 6548, 6541, 2616, 5465});
-        sampleMDF.setOutputChannels(2);
-        sampleMDF.setOutputFrequency(44100);
 
 
-        MDFMetaTag tags;
         //test no tag mp3 file
         MDFMetaTag.createFromFile(new File("target/test-classes/sample-notag.mp3"));
 
         //read tags
-        tags = MDFMetaTag.createFromFile(new File("target/test-classes/sample.mp3"));
-
-        sampleMDF.setTags(tags);
 
         sampleMP3Stream = new FileInputStream("target/test-classes/sample.mp3");
+        sampleMDF = MusicDataFile.create(sampleMP3Stream);
 
-        Assert.assertNotNull("Sample mp3 file 'sample.mp3' not found.", sampleMP3Stream);
     }
 
 
@@ -55,11 +47,11 @@ public class MusicDataFileTest {
         Marshaller m = context.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
-        m.marshal(sampleMDF, System.out);
+        //m.marshal(sampleMDF, System.out);
 
         File testFile = folder.newFile("test.mdf");
         m.marshal(sampleMDF, testFile); // save to file
-
+        System.out.printf(testFile.getAbsolutePath());
         //-- deserialize
 
         Unmarshaller um = context.createUnmarshaller();
