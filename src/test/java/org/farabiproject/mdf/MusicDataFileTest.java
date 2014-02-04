@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
  *
  */
 @Ignore // Bunu simdilik test etmios
+@Deprecated
 public class MusicDataFileTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();

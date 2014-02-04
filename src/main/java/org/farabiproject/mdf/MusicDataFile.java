@@ -12,6 +12,7 @@ import java.io.InputStream;
  * MDF Object.
  * Created by Bahadir on 02.02.2014.
  */
+@Deprecated // Bunun yerine MDFWritable daha guzel oluyo.
 @SuppressWarnings("UnusedDeclaration")
 @XmlRootElement(name = "mdf")
 public class MusicDataFile {

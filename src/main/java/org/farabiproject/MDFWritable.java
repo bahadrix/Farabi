@@ -20,7 +20,7 @@ import java.io.*;
  * Date: 04.02.2014
  * Time: 09:37
  */
-@Deprecated // Bunun yerine MDFWritable daha guzel oluyo.
+
 @SuppressWarnings("UnusedDeclaration") // kullanmamis olabiliris ama kullancas, soz!
 public class MDFWritable implements Writable {
 
