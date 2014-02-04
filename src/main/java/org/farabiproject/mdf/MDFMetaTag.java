@@ -17,6 +17,7 @@ import java.io.File;
  *
  */
 
+@Deprecated // MDFWritable olunca buna gerek kalmiyor.
 @SuppressWarnings("UnusedDeclaration")
 @XmlRootElement(name="tags")
 public class MDFMetaTag {

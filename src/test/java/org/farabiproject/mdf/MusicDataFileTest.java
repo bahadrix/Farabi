@@ -1,10 +1,7 @@
 package org.farabiproject.mdf;
 
 import org.blinkenlights.jid3.ID3Exception;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
 import javax.xml.bind.JAXBContext;
@@ -19,6 +16,7 @@ import java.io.FileNotFoundException;
  * Created by Bahadir on 02.02.2014.
  *
  */
+@Ignore // Bunu simdilik test etmios
 public class MusicDataFileTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();

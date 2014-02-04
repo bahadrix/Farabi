@@ -12,13 +12,12 @@ public class WordMapper extends Mapper<Object, Text, Text, IntWritable> {
     private final static IntWritable one = new IntWritable(1);
 
     @Override
-    public void map(Object key, Text value,
-                    Context contex) throws IOException, InterruptedException {
+    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
         // Break line into words for processing
         StringTokenizer wordList = new StringTokenizer(value.toString());
         while (wordList.hasMoreTokens()) {
             word.set(wordList.nextToken());
-            contex.write(word, one);
+            context.write(word, one);
         }
     }
 }

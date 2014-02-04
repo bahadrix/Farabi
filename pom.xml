@@ -35,6 +35,12 @@
             <artifactId>jaxb-api</artifactId>
             <version>2.2.11</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.2.1</version>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>
@@ -52,6 +58,7 @@
                 <version>2.2</version>
                 <executions>
                     <execution>
+                        <id>main</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
@@ -61,10 +68,13 @@
                             <minimizeJar>true</minimizeJar>
                             <artifactSet>
                                 <excludes>
+                                    <include>org.apache.hadoop.io</include>
                                     <!-- Hadoop libs is already included in running machine's classpath, so exclude them -->
                                     <exclude>org.apache.hadoop</exclude>
+
                                     <!-- junit is for test purposes only -->
                                     <exclude>junit</exclude>
+
                                 </excludes>
                             </artifactSet>
                         </configuration>

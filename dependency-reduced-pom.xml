@@ -7,10 +7,18 @@
   <build>
     <plugins>
       <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.14</version>
+        <configuration>
+          <forkMode>never</forkMode>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>2.2</version>
         <executions>
           <execution>
+            <id>main</id>
             <phase>package</phase>
             <goals>
               <goal>shade</goal>
@@ -19,6 +27,7 @@
               <minimizeJar>true</minimizeJar>
               <artifactSet>
                 <excludes>
+                  <include>org.apache.hadoop.io</include>
                   <exclude>org.apache.hadoop</exclude>
                   <exclude>junit</exclude>
                 </excludes>

@@ -44,6 +44,8 @@ public class WordCount {
         job.setJobName("WordCounty");
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+
         job.setMapperClass(WordMapper.class);
         job.setReducerClass(SumReducer.class);
         job.setOutputKeyClass(Text.class);
