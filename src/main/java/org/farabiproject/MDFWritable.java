@@ -24,26 +24,28 @@ import java.io.*;
 @SuppressWarnings("UnusedDeclaration") // kullanmamis olabiliris ama kullancas, soz!
 public class MDFWritable implements Writable {
 
-    private Text title;
-    private Text artist;
-    private Text album;
-    private Text genreDesc;
-    private Text year;
+    private Text title = new Text("<unknown>");
+    private Text artist = new Text("<unknown>");
+    private Text album = new Text("<unknown>");
+    private Text genreDesc = new Text("<unknown>");
+    private Text year = new Text("<unknown>");
 
 
-    private IntWritable outputFrequency;
-    private IntWritable outputChannels;
-    private IntWritable bitrate;
-    private IntWritable framesize;
-    private BooleanWritable vbr;
-    private BytesWritable frames;
+    private IntWritable outputFrequency  = new IntWritable(0);
+    private IntWritable outputChannels  = new IntWritable(0);
+    private IntWritable bitrate  = new IntWritable(0);
+    private IntWritable framesize  = new IntWritable(0);
+    private BooleanWritable vbr  = new BooleanWritable(false);
+    private BytesWritable frames = new BytesWritable(new byte[]{0});
 
 
     public static MDFWritable createFromFile(File mp3File) throws ID3Exception, FileNotFoundException, DecoderException, BitstreamException {
         MDFWritable mdfWritable = new MDFWritable();
 
 
+
         // Get tags ==================================================================
+
 
         MediaFile mediaFile = new MP3File(mp3File);
         ID3Tag[] tags = mediaFile.getTags();
@@ -98,7 +100,6 @@ public class MDFWritable implements Writable {
         int frameCount = Integer.MAX_VALUE;
         SampleBuffer buff;
 
-        short[] frames = null;
         boolean swap = false;
 
 

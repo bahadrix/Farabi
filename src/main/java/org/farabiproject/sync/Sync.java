@@ -25,6 +25,7 @@ import java.net.URI;
 public class Sync {
     static enum ErrorType {ARGUMENT, NOWORKTODO}
     static PrintStream out;
+
     public static void main(String[] args) {
 
         out = System.out;
@@ -76,13 +77,13 @@ public class Sync {
             MDFWritable value = new MDFWritable();
 
             // Tamam bu deprecated da yerine ne kullancas
+            //noinspection deprecation
             writer = new MapFile.Writer(conf, fs, mapName, key.getClass(), value.getClass());
             out.println("Started");
             int i = 0;
             for(File file : mp3Files) {  i++;
                 out.print("Adding file " + String.valueOf(i) +  " \"" + file.getName() + "\" ");
                 try {
-
                     key.set(i);
                     value = MDFWritable.createFromFile(file);
                     writer.append(key, value);
@@ -92,7 +93,6 @@ public class Sync {
                 } catch (Exception e) {
                     out.println("[FAIL] Exception;");
                     e.printStackTrace();
-
                 }
 
             }
@@ -119,13 +119,16 @@ public class Sync {
                 break;
             case NOWORKTODO:
                 out.println("Nothing happened.");
+                break;
         }
 
 
         System.exit(-1);
     }
 
-    public static void errorOut  (ErrorType t) {
+
+    @SuppressWarnings("UnusedDeclaration")
+    public static void errorOut(ErrorType t) {
         errorOut(t,null);
     }
 
