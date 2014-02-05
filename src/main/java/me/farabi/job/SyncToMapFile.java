@@ -42,9 +42,6 @@ public class SyncToMapFile {
             localDir = new File(args[1]);
         }
 
-
-
-
         if(!localDir.isDirectory()) {
             errorOut(ErrorType.ARGUMENT, "Specified local path is not a directory");
         }
@@ -75,7 +72,6 @@ public class SyncToMapFile {
         long tempTime = startTime;
         MapFile.Writer writer = null;
         try {
-
             Configuration conf = new Configuration();
             conf.set("mapred.child.java.opts", "-Xmx2048m");
             FileSystem fs = FileSystem.get(URI.create(mapName), conf);
@@ -103,8 +99,6 @@ public class SyncToMapFile {
                 }
                 tempTime = System.currentTimeMillis();
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
