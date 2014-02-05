@@ -92,7 +92,7 @@ public class SyncToMapFile {
                 out.print("Adding file " + String.valueOf(i) +  " \"" + file.getName() + "\" ");
                 try {
                     key.set(i);
-                    value = MDFWritable.createFromFile(file);
+                    value = MDFWritable.createFromFile(file, false);
                     writer.append(key, value);
                     out.println("[ OK ]" + String.format("%.2f secs", (double)(System.currentTimeMillis() - tempTime)/1000));
                 } catch (ID3Exception e) {

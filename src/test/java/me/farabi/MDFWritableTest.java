@@ -13,7 +13,7 @@ import java.io.File;
 public class MDFWritableTest extends TestCase {
     public void testCreateFromMp3() throws Exception {
 
-        MDFWritable mdfw = MDFWritable.createFromFile(new File("target/test-classes/sample.mp3"));
+        MDFWritable mdfw = MDFWritable.createFromFile(new File("target/test-classes/sample.mp3"), true);
 
 
 

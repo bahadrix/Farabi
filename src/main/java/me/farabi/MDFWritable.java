@@ -1,6 +1,7 @@
 package me.farabi;
 
 import javazoom.jl.decoder.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.io.*;
 import org.blinkenlights.jid3.ID3Exception;
 import org.blinkenlights.jid3.ID3Tag;
@@ -24,6 +25,8 @@ import java.io.*;
 @SuppressWarnings("UnusedDeclaration") // kullanmamis olabiliris ama kullancas, soz!
 public class MDFWritable implements Writable {
 
+
+
     private Text title = new Text("<unknown>");
     private Text artist = new Text("<unknown>");
     private Text album = new Text("<unknown>");
@@ -36,10 +39,10 @@ public class MDFWritable implements Writable {
     private IntWritable bitrate  = new IntWritable(0);
     private IntWritable framesize  = new IntWritable(0);
     private BooleanWritable vbr  = new BooleanWritable(false);
-    private BytesWritable frames = new BytesWritable(new byte[]{0});
+    private BytesWritable fileData = new BytesWritable(new byte[]{0});
 
 
-    public static MDFWritable createFromFile(File mp3File) throws ID3Exception, FileNotFoundException, DecoderException, BitstreamException {
+    public static MDFWritable createFromFile(File mp3File, boolean decodeRaw) throws ID3Exception, IOException, DecoderException, BitstreamException {
         MDFWritable mdfWritable = new MDFWritable();
 
 
@@ -90,7 +93,7 @@ public class MDFWritable implements Writable {
         }
 
 
-        // Get frames
+        // Get fileData
 
 
         Decoder decoder = new Decoder();
@@ -115,12 +118,13 @@ public class MDFWritable implements Writable {
                     mdfWritable.setFramesize(header.framesize);
                     mdfWritable.setVbr(header.vbr());
                     swap = header.frequency() >= 44000; // bkz: http://stackoverflow.com/a/15187707
-
+                    if(!decodeRaw)
+                        break;
                 }
 
                 buff = (SampleBuffer)decoder.decodeFrame(header, stream);
 
-                //frames = ArrayUtils.addAll(frames, buff.getBuffer());
+                //fileData = ArrayUtils.addAll(fileData, buff.getBuffer());
                 short[] pcm = buff.getBuffer();
                 for(short s : pcm) {
                     // bkz: http://stackoverflow.com/a/15187707
@@ -136,13 +140,17 @@ public class MDFWritable implements Writable {
                 stream.closeFrame();
             }
 
-
-        mdfWritable.setFrames(new BytesWritable(bout.toByteArray()));
+        if(!decodeRaw) {
+            mdfWritable.setFileData(new BytesWritable(
+                    FileUtils.readFileToByteArray(mp3File)
+            ));
+        } else {
+            mdfWritable.setFileData(new BytesWritable(
+                    bout.toByteArray()
+            ));
+        }
         return mdfWritable;
     }
-
-
-
 
     @Override
     public void write(DataOutput out) throws IOException {
@@ -151,7 +159,7 @@ public class MDFWritable implements Writable {
         album.write(out);
         genreDesc.write(out);
         year.write(out);
-        frames.write(out);
+        fileData.write(out);
     }
 
     @Override
@@ -161,21 +169,20 @@ public class MDFWritable implements Writable {
         album.readFields(in);
         genreDesc.readFields(in);
         year.readFields(in);
-        frames.readFields(in);
+        fileData.readFields(in);
     }
 
-    public BytesWritable getFrames() {
-        return frames;
+    public BytesWritable getFileData() {
+        return fileData;
     }
 
-    public void setFrames(BytesWritable frames) {
-        this.frames = frames;
+    public void setFileData(BytesWritable fileData) {
+        this.fileData = fileData;
     }
 
     public Text getTitle() {
         return title;
     }
-
 
     public void setTitle(String title) {
         this.title = title == null ? new Text() : new Text(title);
