@@ -1,4 +1,4 @@
-package org.farabiproject.sync;
+package org.farabiproject.job;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -22,7 +22,7 @@ import java.net.URI;
  * Date: 04.02.2014
  * Time: 11:03
  */
-public class Sync {
+public class SyncToMapFile {
     static enum ErrorType {ARGUMENT, NOWORKTODO}
     static PrintStream out;
 
@@ -41,7 +41,6 @@ public class Sync {
             errorOut(ErrorType.ARGUMENT, "Specified local path is not a directory");
         }
 
-
         out.print("Getting file list...");
 
         File[] mp3files = localDir.listFiles(new FilenameFilter() {
@@ -57,9 +56,7 @@ public class Sync {
             errorOut(ErrorType.NOWORKTODO, "No mp3 files found under " + localDir.getAbsolutePath());
         }
 
-
         create(mp3files, localDir.getName());
-
         System.exit(0);
     }
 
@@ -76,7 +73,7 @@ public class Sync {
             IntWritable key = new IntWritable();
             MDFWritable value = new MDFWritable();
 
-            // Tamam bu deprecated da yerine ne kullancas
+            // Tamam bu deprecated da yerine ne kullancas a.
             //noinspection deprecation
             writer = new MapFile.Writer(conf, fs, mapName, key.getClass(), value.getClass());
             out.println("Started");
@@ -133,6 +130,6 @@ public class Sync {
     }
 
     private static void showUsage(){
-        System.out.println("USAGE: org.farabiproject.sync.Sync <local_sync_dir>");
+        System.out.println("USAGE: org.farabiproject.job.SyncToMapFile <local_sync_dir>");
     }
 }
