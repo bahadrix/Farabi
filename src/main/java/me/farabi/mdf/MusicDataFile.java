@@ -1,4 +1,4 @@
-package org.farabiproject.mdf;
+package me.farabi.mdf;
 
 import javazoom.jl.decoder.*;
 import org.apache.commons.lang.ArrayUtils;

@@ -1,4 +1,4 @@
-package org.farabiproject.audio;
+package me.farabi.audio;
 
 import javazoom.jl.decoder.*;
 

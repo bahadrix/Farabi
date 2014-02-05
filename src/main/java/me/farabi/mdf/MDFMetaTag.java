@@ -1,4 +1,4 @@
-package org.farabiproject.mdf;
+package me.farabi.mdf;
 
 import org.blinkenlights.jid3.ID3Exception;
 import org.blinkenlights.jid3.ID3Tag;

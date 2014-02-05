@@ -1,4 +1,4 @@
-package org.farabiproject.example;
+package me.farabi.example;
 
 import java.io.IOException;
 import java.util.StringTokenizer;

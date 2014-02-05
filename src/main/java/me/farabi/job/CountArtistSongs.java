@@ -1,4 +1,4 @@
-package org.farabiproject.job;
+package me.farabi.job;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -9,7 +9,7 @@ import org.apache.hadoop.mapred.*;
 
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
-import org.farabiproject.MDFWritable;
+import me.farabi.MDFWritable;
 
 import java.io.IOException;
 import java.util.Iterator;

@@ -1,4 +1,4 @@
-package org.farabiproject;
+package me.farabi;
 
 import javazoom.jl.decoder.*;
 import org.apache.hadoop.io.*;

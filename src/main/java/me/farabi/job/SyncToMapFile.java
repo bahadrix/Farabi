@@ -1,4 +1,4 @@
-package org.farabiproject.job;
+package me.farabi.job;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -6,7 +6,7 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.MapFile;
 import org.blinkenlights.jid3.ID3Exception;
-import org.farabiproject.MDFWritable;
+import me.farabi.MDFWritable;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -25,17 +25,25 @@ import java.net.URI;
 public class SyncToMapFile {
     static enum ErrorType {ARGUMENT, NOWORKTODO}
     static PrintStream out;
-
+    private static long startTime;
     public static void main(String[] args) {
 
         out = System.out;
-
+        String opts;
+        String targetPath;
+        File localDir = null;
 
         if(args.length == 0) {
             errorOut(ErrorType.ARGUMENT, "No Argument found.");
+        } else if(args.length == 1) {
+            localDir = new File(args[0]);
+        } else if(args.length == 2) {
+            opts = args[0];
+            localDir = new File(args[1]);
         }
 
-        File localDir = new File(args[0]);
+
+
 
         if(!localDir.isDirectory()) {
             errorOut(ErrorType.ARGUMENT, "Specified local path is not a directory");
@@ -63,6 +71,8 @@ public class SyncToMapFile {
 
     private static void create(File[] mp3Files, String mapName) {
         out.println("Creating map " + mapName);
+        startTime = System.currentTimeMillis();
+        long tempTime = startTime;
         MapFile.Writer writer = null;
         try {
 
@@ -84,20 +94,22 @@ public class SyncToMapFile {
                     key.set(i);
                     value = MDFWritable.createFromFile(file);
                     writer.append(key, value);
-                    out.println("[ OK ]" );
+                    out.println("[ OK ]" + String.format("%.2f secs", (System.currentTimeMillis() - tempTime)/1000));
                 } catch (ID3Exception e) {
                     out.println("[FAIL]: ID3Exception" );
                 } catch (Exception e) {
                     out.println("[FAIL] Exception;");
                     e.printStackTrace();
                 }
-
+                tempTime = System.currentTimeMillis();
             }
+
 
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             IOUtils.closeStream(writer);
+            out.println("Completed! Total time: " + String.format("%.2f secs", (System.currentTimeMillis() - startTime)/1000));
         }
 
     }
@@ -130,6 +142,6 @@ public class SyncToMapFile {
     }
 
     private static void showUsage(){
-        System.out.println("USAGE: org.farabiproject.job.SyncToMapFile <local_sync_dir>");
+        System.out.println("USAGE: me.farabi.job.SyncToMapFile [opts] <local_sync_dir>");
     }
 }

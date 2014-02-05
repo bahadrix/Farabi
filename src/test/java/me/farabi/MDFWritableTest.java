@@ -1,4 +1,4 @@
-package org.farabiproject;
+package me.farabi;
 
 import junit.framework.TestCase;
 

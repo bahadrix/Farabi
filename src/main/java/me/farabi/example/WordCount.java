@@ -1,4 +1,4 @@
-package org.farabiproject.example;
+package me.farabi.example;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -23,8 +23,8 @@ public class WordCount {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
  
-        job.setMapperClass(org.farabiproject.example.WordMapper.class);
-        job.setReducerClass(org.farabiproject.example.SumReducer.class);
+        job.setMapperClass(me.farabi.example.WordMapper.class);
+        job.setReducerClass(me.farabi.example.SumReducer.class);
  
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
@@ -32,7 +32,7 @@ public class WordCount {
         FileInputFormat.setInputPaths(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
  
-        job.setJarByClass(org.farabiproject.example.WordCount.class);
+        job.setJarByClass(me.farabi.example.WordCount.class);
  
         job.submit();
           */
