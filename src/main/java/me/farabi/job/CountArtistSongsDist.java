@@ -5,7 +5,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.util.Tool;
@@ -23,10 +22,10 @@ import java.util.Iterator;
 public class CountArtistSongsDist extends Configured implements Tool{
 
     public static class Mappa extends MapReduceBase
-            implements Mapper<LongWritable, MDFWritable, Text, IntWritable> {
+            implements Mapper<Text, MDFWritable, Text, IntWritable> {
 
         @Override
-        public void map(LongWritable key, MDFWritable mdf, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
+        public void map(Text key, MDFWritable mdf, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
 
             output.collect(mdf.getArtist(), new IntWritable(1));
 
@@ -48,7 +47,7 @@ public class CountArtistSongsDist extends Configured implements Tool{
 
 
     public static void main(String[] args) throws Exception {
-        int res = ToolRunner.run(new Configuration(), new CountArtistSongs(), args);
+        int res = ToolRunner.run(new Configuration(), new CountArtistSongsDist(), args);
         System.exit(res);
     }
 
