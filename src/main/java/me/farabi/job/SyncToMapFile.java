@@ -94,7 +94,7 @@ public class SyncToMapFile {
                     key.set(i);
                     value = MDFWritable.createFromFile(file);
                     writer.append(key, value);
-                    out.println("[ OK ]" + String.format("%.2f secs", (System.currentTimeMillis() - tempTime)/1000));
+                    out.println("[ OK ]" + String.format("%.2f secs", (double)(System.currentTimeMillis() - tempTime)/1000));
                 } catch (ID3Exception e) {
                     out.println("[FAIL]: ID3Exception" );
                 } catch (Exception e) {
@@ -109,7 +109,7 @@ public class SyncToMapFile {
             e.printStackTrace();
         } finally {
             IOUtils.closeStream(writer);
-            out.println("Completed! Total time: " + String.format("%.2f secs", (System.currentTimeMillis() - startTime)/1000));
+            out.println("Completed! Total time: " + String.format("%.2f secs", (double)(System.currentTimeMillis() - startTime)/1000));
         }
 
     }
