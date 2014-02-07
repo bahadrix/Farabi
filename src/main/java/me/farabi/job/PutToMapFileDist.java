@@ -1,6 +1,5 @@
 package me.farabi.job;
 
-import javazoom.jl.decoder.Bitstream;
 import javazoom.jl.decoder.BitstreamException;
 import javazoom.jl.decoder.DecoderException;
 import me.farabi.MDFWritable;
@@ -9,25 +8,15 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
-import org.apache.hadoop.mapred.lib.CombineFileInputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.blinkenlights.jid3.ID3Exception;
-import org.blinkenlights.jid3.ID3Tag;
-import org.blinkenlights.jid3.MP3File;
-import org.blinkenlights.jid3.MediaFile;
-import org.blinkenlights.jid3.v1.ID3V1Tag;
-import org.blinkenlights.jid3.v2.ID3V2Tag;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 
 /**
  * Farabi
@@ -35,7 +24,7 @@ import java.net.URI;
  * Date: 05.02.2014
  * Time: 14:00
  */
-public class SyncToMapFileDist extends Configured implements Tool {
+public class PutToMapFileDist extends Configured implements Tool {
 
 
 
@@ -77,7 +66,7 @@ public class SyncToMapFileDist extends Configured implements Tool {
 
     public static void main(String[] args) throws Exception {
 
-        int res = ToolRunner.run(new Configuration(), new SyncToMapFileDist(), args);
+        int res = ToolRunner.run(new Configuration(), new PutToMapFileDist(), args);
         System.exit(res);
 
     }

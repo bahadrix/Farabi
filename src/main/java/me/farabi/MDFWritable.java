@@ -27,19 +27,19 @@ public class MDFWritable implements Writable {
 
 
 
-    private Text title = new Text("<unknown>");
-    private Text artist = new Text("<unknown>");
-    private Text album = new Text("<unknown>");
-    private Text genreDesc = new Text("<unknown>");
-    private Text year = new Text("<unknown>");
+    protected Text title = new Text("<unknown>");
+    protected Text artist = new Text("<unknown>");
+    protected Text album = new Text("<unknown>");
+    protected Text genreDesc = new Text("<unknown>");
+    protected Text year = new Text("<unknown>");
 
 
-    private IntWritable outputFrequency  = new IntWritable(0);
-    private IntWritable outputChannels  = new IntWritable(0);
-    private IntWritable bitrate  = new IntWritable(0);
-    private IntWritable framesize  = new IntWritable(0);
-    private BooleanWritable vbr  = new BooleanWritable(false);
-    private BytesWritable fileData = new BytesWritable(new byte[]{0});
+    protected IntWritable outputFrequency  = new IntWritable(0);
+    protected IntWritable outputChannels  = new IntWritable(0);
+    protected IntWritable bitrate  = new IntWritable(0);
+    protected IntWritable framesize  = new IntWritable(0);
+    protected BooleanWritable vbr  = new BooleanWritable(false);
+    protected BytesWritable fileData = new BytesWritable(new byte[]{0});
 
 
     public static MDFWritable createFromFile(File mp3File, boolean decodeRaw) throws ID3Exception, IOException, DecoderException, BitstreamException {
