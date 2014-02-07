@@ -23,7 +23,7 @@ import java.net.URI;
  * Date: 04.02.2014
  * Time: 11:03
  */
-public class PutToMapFile {
+public class PutSeparated {
     static enum ErrorType {ARGUMENT, NOWORKTODO}
     static PrintStream out;
     private static long startTime;
@@ -144,6 +144,6 @@ public class PutToMapFile {
     }
 
     private static void showUsage(){
-        System.out.println("USAGE: me.farabi.job.PutToMapFile [opts] <local_sync_dir>");
+        System.out.println("USAGE: me.farabi.job.PutSeparated [opts] <local_sync_dir>");
     }
 }
