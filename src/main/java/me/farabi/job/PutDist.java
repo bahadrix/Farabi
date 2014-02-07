@@ -24,7 +24,7 @@ import java.io.IOException;
  * Date: 05.02.2014
  * Time: 14:00
  */
-public class PutToMapFileDist extends Configured implements Tool {
+public class PutDist extends Configured implements Tool {
 
 
 
@@ -66,7 +66,7 @@ public class PutToMapFileDist extends Configured implements Tool {
 
     public static void main(String[] args) throws Exception {
 
-        int res = ToolRunner.run(new Configuration(), new PutToMapFileDist(), args);
+        int res = ToolRunner.run(new Configuration(), new PutDist(), args);
         System.exit(res);
 
     }
