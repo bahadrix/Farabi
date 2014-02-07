@@ -24,7 +24,7 @@ import java.io.IOException;
  * Date: 05.02.2014
  * Time: 14:00
  */
-public class PutDist extends Configured implements Tool {
+public class MapDecode extends Configured implements Tool {
 
 
 
@@ -66,7 +66,7 @@ public class PutDist extends Configured implements Tool {
 
     public static void main(String[] args) throws Exception {
 
-        int res = ToolRunner.run(new Configuration(), new PutDist(), args);
+        int res = ToolRunner.run(new Configuration(), new MapDecode(), args);
         System.exit(res);
 
     }
@@ -76,7 +76,7 @@ public class PutDist extends Configured implements Tool {
     public int run(String[] args) throws Exception {
 
         Configuration conf = getConf();
-        JobConf job = new JobConf(conf, CountArtistSongs.class);
+        JobConf job = new JobConf(conf, MapDecode.class);
 
         if(args.length != 2) {
             System.out.println("Usage: <in> <out>");
