@@ -1,5 +1,6 @@
 package me.farabi.job;
 
+import me.farabi.MDFSongTags;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.IOUtils;
@@ -26,6 +27,8 @@ public class PutToMapFile {
     static enum ErrorType {ARGUMENT, NOWORKTODO}
     static PrintStream out;
     private static long startTime;
+
+
     public static void main(String[] args) {
 
         out = System.out;
@@ -70,7 +73,8 @@ public class PutToMapFile {
         out.println("Creating map " + mapName);
         startTime = System.currentTimeMillis();
         long tempTime = startTime;
-        MapFile.Writer writer = null;
+        MapFile.Writer writerAudio = null;
+        MapFile.Writer writerTags = null;
         try {
             Configuration conf = new Configuration();
             conf.set("mapred.child.java.opts", "-Xmx2048m");
@@ -81,7 +85,9 @@ public class PutToMapFile {
 
             // Tamam bu deprecated da yerine ne kullancas a.
             //noinspection deprecation
-            writer = new MapFile.Writer(conf, fs, mapName, key.getClass(), value.getClass());
+            writerAudio = new MapFile.Writer(conf, fs, mapName + "_audio", key.getClass(), value.getClass());
+            //noinspection deprecation
+            writerTags  = new MapFile.Writer(conf, fs, mapName + "_tags",  key.getClass(), value.tags.getClass());
             out.println("Started");
             int i = 0;
             for(File file : mp3Files) {  i++;
@@ -89,7 +95,8 @@ public class PutToMapFile {
                 try {
                     key.set(i);
                     value = MDFWritable.createFromFile(file, false);
-                    writer.append(key, value);
+                    writerAudio.append(key, value);
+                    writerTags.append(key, value.tags);
                     out.println("[ OK ]" + String.format("%.2f secs", (double)(System.currentTimeMillis() - tempTime)/1000));
                 } catch (ID3Exception e) {
                     out.println("[FAIL]: ID3Exception" );
@@ -102,7 +109,8 @@ public class PutToMapFile {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            IOUtils.closeStream(writer);
+            IOUtils.closeStream(writerAudio);
+            IOUtils.closeStream(writerTags);
             out.println("Completed! Total time: " + String.format("%.2f secs", (double)(System.currentTimeMillis() - startTime)/1000));
         }
 

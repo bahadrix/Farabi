@@ -26,12 +26,7 @@ import java.io.*;
 public class MDFWritable implements Writable {
 
 
-
-    protected Text title = new Text("<unknown>");
-    protected Text artist = new Text("<unknown>");
-    protected Text album = new Text("<unknown>");
-    protected Text genreDesc = new Text("<unknown>");
-    protected Text year = new Text("<unknown>");
+    public MDFSongTags tags;
 
 
     protected IntWritable outputFrequency  = new IntWritable(0);
@@ -41,6 +36,9 @@ public class MDFWritable implements Writable {
     protected BooleanWritable vbr  = new BooleanWritable(false);
     protected BytesWritable fileData = new BytesWritable(new byte[]{0});
 
+    public MDFWritable() {
+        tags = new MDFSongTags();
+    }
 
     public static MDFWritable createFromFile(File mp3File, boolean decodeRaw) throws ID3Exception, IOException, DecoderException, BitstreamException {
         MDFWritable mdfWritable = new MDFWritable();
@@ -53,38 +51,36 @@ public class MDFWritable implements Writable {
         MediaFile mediaFile = new MP3File(mp3File);
         ID3Tag[] tags = mediaFile.getTags();
 
-
-
         for (ID3Tag tag : tags) {
             if (tag instanceof ID3V1_0Tag) {
                 ID3V1_0Tag oID3V1_0Tag = (ID3V1_0Tag) tag;
                 if (oID3V1_0Tag.getTitle() != null) {
-                    mdfWritable.setTitle(oID3V1_0Tag.getTitle());
-                    mdfWritable.setAlbum(oID3V1_0Tag.getAlbum());
-                    mdfWritable.setArtist(oID3V1_0Tag.getArtist());
-                    mdfWritable.setGenreDesc(oID3V1_0Tag.getGenre().toString());
-                    mdfWritable.setYear(oID3V1_0Tag.getYear());
+                    mdfWritable.tags.setTitle(oID3V1_0Tag.getTitle());
+                    mdfWritable.tags.setAlbum(oID3V1_0Tag.getAlbum());
+                    mdfWritable.tags.setArtist(oID3V1_0Tag.getArtist());
+                    mdfWritable.tags.setGenreDesc(oID3V1_0Tag.getGenre().toString());
+                    mdfWritable.tags.setYear(oID3V1_0Tag.getYear());
                 }
             } else if (tag instanceof ID3V1_1Tag) {
                 ID3V1_1Tag oID3V1_1Tag = (ID3V1_1Tag) tag;
                 if (oID3V1_1Tag.getTitle() != null) {
-                    mdfWritable.setTitle(oID3V1_1Tag.getTitle());
-                    mdfWritable.setAlbum(oID3V1_1Tag.getAlbum());
-                    mdfWritable.setArtist(oID3V1_1Tag.getArtist());
-                    mdfWritable.setGenreDesc(oID3V1_1Tag.getGenre().toString());
-                    mdfWritable.setYear(oID3V1_1Tag.getYear());
+                    mdfWritable.tags.setTitle(oID3V1_1Tag.getTitle());
+                    mdfWritable.tags.setAlbum(oID3V1_1Tag.getAlbum());
+                    mdfWritable.tags.setArtist(oID3V1_1Tag.getArtist());
+                    mdfWritable.tags.setGenreDesc(oID3V1_1Tag.getGenre().toString());
+                    mdfWritable.tags.setYear(oID3V1_1Tag.getYear());
                 }
             } else if (tag instanceof ID3V2_3_0Tag) {
                 ID3V2_3_0Tag oID3V2_3Tag = (ID3V2_3_0Tag) tag;
                 if (oID3V2_3Tag.getTitle() != null) {
-                    mdfWritable.setTitle(oID3V2_3Tag.getTitle());
-                    mdfWritable.setAlbum(oID3V2_3Tag.getAlbum());
-                    mdfWritable.setArtist(oID3V2_3Tag.getArtist());
-                    mdfWritable.setGenreDesc(oID3V2_3Tag.getGenre());
+                    mdfWritable.tags.setTitle(oID3V2_3Tag.getTitle());
+                    mdfWritable.tags.setAlbum(oID3V2_3Tag.getAlbum());
+                    mdfWritable.tags.setArtist(oID3V2_3Tag.getArtist());
+                    mdfWritable.tags.setGenreDesc(oID3V2_3Tag.getGenre());
                     try {
-                        mdfWritable.setYear(String.valueOf(oID3V2_3Tag.getYear()));
+                        mdfWritable.tags.setYear(String.valueOf(oID3V2_3Tag.getYear()));
                     } catch (ID3Exception e) {
-                        mdfWritable.setYear("");
+                        mdfWritable.tags.setYear("");
                     }
 
                 }
@@ -154,21 +150,25 @@ public class MDFWritable implements Writable {
 
     @Override
     public void write(DataOutput out) throws IOException {
-        title.write(out);
-        artist.write(out);
-        album.write(out);
-        genreDesc.write(out);
-        year.write(out);
+        tags.write(out);
+        fileData.write(out);
+        outputFrequency.write(out);
+        outputChannels.write(out);
+        bitrate.write(out);
+        framesize.write(out);
+        vbr.write(out);
         fileData.write(out);
     }
 
     @Override
     public void readFields(DataInput in) throws IOException {
-        title.readFields(in);
-        artist.readFields(in);
-        album.readFields(in);
-        genreDesc.readFields(in);
-        year.readFields(in);
+        tags.readFields(in);
+        fileData.readFields(in);
+        outputFrequency.readFields(in);
+        outputChannels.readFields(in);
+        bitrate.readFields(in);
+        framesize.readFields(in);
+        vbr.readFields(in);
         fileData.readFields(in);
     }
 
@@ -178,46 +178,6 @@ public class MDFWritable implements Writable {
 
     public void setFileData(BytesWritable fileData) {
         this.fileData = fileData;
-    }
-
-    public Text getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title == null ? new Text() : new Text(title);
-    }
-    public Text getArtist() {
-        return artist;
-    }
-
-    public void setArtist(String artist) {
-        this.artist =  artist == null ? new Text() : new Text(artist);
-    }
-
-    public Text getAlbum() {
-        return album;
-    }
-
-    public void setAlbum(String album) {
-        this.album = album == null ? new Text() : new Text(album);
-    }
-
-    public Text getGenreDesc() {
-        return genreDesc;
-    }
-
-
-    public void setGenreDesc(String genreDesc) {
-        this.genreDesc = genreDesc == null ? new Text() : new Text(genreDesc);
-    }
-
-    public Text getYear() {
-        return year;
-    }
-
-    public void setYear(String year) {
-        this.year = year == null ? new Text() : new Text(year);
     }
 
     public IntWritable getOutputFrequency() {

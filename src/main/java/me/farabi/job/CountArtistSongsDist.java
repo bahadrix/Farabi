@@ -27,7 +27,7 @@ public class CountArtistSongsDist extends Configured implements Tool{
         @Override
         public void map(Text key, MDFWritable mdf, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
 
-            output.collect(mdf.getArtist(), new IntWritable(1));
+            output.collect(mdf.tags.getArtist(), new IntWritable(1));
 
         }
     }
