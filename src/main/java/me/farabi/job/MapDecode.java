@@ -1,5 +1,7 @@
 package me.farabi.job;
 
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.UnsupportedTagException;
 import javazoom.jl.decoder.BitstreamException;
 import javazoom.jl.decoder.DecoderException;
 import me.farabi.MDFWritable;
@@ -12,14 +14,15 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
-import org.blinkenlights.jid3.ID3Exception;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 /**
- * Farabi
+ * Decodes and reads tags from raw mp3 files on hdfs.
+ * Usage:
+ * $ hadoop jar farabi.jar me.farabi.job.MapDecode samp3-original samp3-out
+ *
  * User: Bahadir
  * Date: 05.02.2014
  * Time: 14:00
@@ -34,30 +37,33 @@ public class MapDecode extends Configured implements Tool {
 
         @Override
         public void map(Text text, BytesWritable bytesWritable,
-                        OutputCollector<Text, MDFWritable> textMDFWritableOutputCollector, Reporter reporter) throws IOException {
+                        OutputCollector<Text, MDFWritable> output, Reporter reporter) throws IOException {
 
-
+            /*
             File tempFile = File.createTempFile(text.toString(), ".tmp3");
 
             FileOutputStream fout = new FileOutputStream(tempFile);
             fout.write(bytesWritable.getBytes());
             fout.close();
+              */
+
+            ByteArrayInputStream bis = new ByteArrayInputStream(bytesWritable.getBytes());
 
             MDFWritable mdf;
             try {
-                mdf = MDFWritable.createFromFile(tempFile, true);
-                textMDFWritableOutputCollector.collect(text, mdf);
-            } catch (ID3Exception e) {
-                e.printStackTrace();
+                mdf = new MDFWritable(bis, bytesWritable.getLength(), true);
+                output.collect(text, mdf);
             } catch (DecoderException e) {
                 e.printStackTrace();
             } catch (BitstreamException e) {
                 e.printStackTrace();
             } catch (ArrayIndexOutOfBoundsException e) {
                 System.out.println("JLayer sucks for: " + text.toString());
+            } catch (UnsupportedTagException e) {
+                e.printStackTrace();
+            } catch (InvalidDataException e) {
+                e.printStackTrace();
             }
-
-
 
 
         }

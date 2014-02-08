@@ -1,13 +1,12 @@
 package me.farabi.job;
 
-import me.farabi.MDFSongTags;
+import com.mpatric.mp3agic.UnsupportedTagException;
+import me.farabi.MDFWritable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.MapFile;
-import org.blinkenlights.jid3.ID3Exception;
-import me.farabi.MDFWritable;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -29,11 +28,11 @@ public class PutSeparated {
     private static long startTime;
 
 
+    @SuppressWarnings("UnusedDeclaration")
     public static void main(String[] args) {
 
         out = System.out;
         String opts;
-        String targetPath;
         File localDir = null;
 
         if(args.length == 0) {
@@ -45,6 +44,7 @@ public class PutSeparated {
             localDir = new File(args[1]);
         }
 
+        assert localDir != null;
         if(!localDir.isDirectory()) {
             errorOut(ErrorType.ARGUMENT, "Specified local path is not a directory");
         }
@@ -67,6 +67,7 @@ public class PutSeparated {
         create(mp3files, localDir.getName());
         System.exit(0);
     }
+
 
 
     private static void create(File[] mp3Files, String mapName) {
@@ -94,11 +95,11 @@ public class PutSeparated {
                 out.print("Adding file " + String.valueOf(i) +  " \"" + file.getName() + "\" ");
                 try {
                     key.set(i);
-                    value = MDFWritable.createFromFile(file, false);
+                    value = new MDFWritable(file, false);
                     writerAudio.append(key, value);
                     writerTags.append(key, value.tags);
                     out.println("[ OK ]" + String.format("%.2f secs", (double)(System.currentTimeMillis() - tempTime)/1000));
-                } catch (ID3Exception e) {
+                } catch (UnsupportedTagException e) {
                     out.println("[FAIL]: ID3Exception" );
                 } catch (Exception e) {
                     out.println("[FAIL] Exception;");

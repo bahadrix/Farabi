@@ -1,14 +1,17 @@
 package me.farabi;
 
-import org.apache.hadoop.io.BytesWritable;
+import com.mpatric.mp3agic.ID3v1;
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.Mp3Stream;
+import com.mpatric.mp3agic.UnsupportedTagException;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Farabi
@@ -16,6 +19,7 @@ import java.io.IOException;
  * Date: 07.02.2014
  * Time: 13:59
  */
+@SuppressWarnings("UnusedDeclaration")
 public class MDFSongTags implements Writable {
     protected IntWritable ID = new IntWritable(0); // can't be null
     protected Text title = new Text("<unknown>");
@@ -26,6 +30,28 @@ public class MDFSongTags implements Writable {
 
     public MDFSongTags() {}
 
+    public MDFSongTags(InputStream in, long length, int ID) throws InvalidDataException, IOException, UnsupportedTagException {
+
+        Mp3Stream mp3Stream = new Mp3Stream(in, length);
+
+        ID3v1 tags = mp3Stream.getId3v2Tag() != null ?
+                mp3Stream.getId3v2Tag() :
+                mp3Stream.getId3v1Tag();
+
+
+        setID(new IntWritable(ID));
+
+        if(tags != null) {
+            setAlbum(tags.getAlbum());
+            setArtist(tags.getArtist());
+            setGenreDesc(tags.getGenreDescription());
+            setTitle(tags.getTitle());
+            setYear(tags.getYear());
+        }
+
+
+    }
+
     public IntWritable getID() {
         return ID;
     }
@@ -33,6 +59,7 @@ public class MDFSongTags implements Writable {
     public void setID(IntWritable ID) {
         this.ID = ID;
     }
+
 
 
 
@@ -77,12 +104,51 @@ public class MDFSongTags implements Writable {
     }
 
     @Override
-    public void write(DataOutput dataOutput) throws IOException {
-
+    public void write(DataOutput out) throws IOException {
+        ID.write(out);
+        title.write(out);
+        artist.write(out);
+        album.write(out);
+        genreDesc.write(out);
+        year.write(out);
     }
 
     @Override
-    public void readFields(DataInput dataInput) throws IOException {
+    public void readFields(DataInput in) throws IOException {
+        ID.readFields(in);
+        title.readFields(in);
+        artist.readFields(in);
+        album.readFields(in);
+        genreDesc.readFields(in);
+        year.readFields(in);
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MDFSongTags that = (MDFSongTags) o;
+
+        if (!ID.equals(that.ID)) return false;
+        if (!album.equals(that.album)) return false;
+        if (!artist.equals(that.artist)) return false;
+        if (!genreDesc.equals(that.genreDesc)) return false;
+        if (!title.equals(that.title)) return false;
+        //noinspection RedundantIfStatement
+        if (!year.equals(that.year)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = ID.hashCode();
+        result = 31 * result + title.hashCode();
+        result = 31 * result + artist.hashCode();
+        result = 31 * result + album.hashCode();
+        result = 31 * result + genreDesc.hashCode();
+        result = 31 * result + year.hashCode();
+        return result;
     }
 }

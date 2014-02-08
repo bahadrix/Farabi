@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
  * Date: 04.02.2014
  * Time: 17:04
  */
+@SuppressWarnings("UnusedDeclaration")
 public class Util {
 
     public static String getMD5(String original) {
@@ -22,8 +23,8 @@ public class Util {
             byte byteData[] = md.digest();
 
             sb = new StringBuffer();
-            for (int i = 0; i < byteData.length; i++) {
-                sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+            for (byte aByteData : byteData) {
+                sb.append(Integer.toString((aByteData & 0xff) + 0x100, 16).substring(1));
             }
 
         } catch (NoSuchAlgorithmException e) {
@@ -33,4 +34,6 @@ public class Util {
         return sb.toString();
 
     }
+
+
 }

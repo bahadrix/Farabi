@@ -1,33 +1,37 @@
 package me.farabi.job;
 
+import me.farabi.MDFSongTags;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
-
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
-import me.farabi.MDFWritable;
 
 import java.io.IOException;
 import java.util.Iterator;
 
 /**
- * Example mapreduce work on map file.
- * Created by Bahadir on 04.02.2014.
+ * Count Songs By Artists Name From Tags Map File
+ * Example usage:
+ * $ hadoop jar farabi.jar me.farabi.job.CASFromTagsMap samp3_tags/data artsongs_map
+ *
+ * User: Bahadir
+ * Date: 08.02.2014
+ * Time: 10:10
+ *
  */
-public class CountArtistSongs extends Configured implements Tool {
-
+public class CASFromTagsMap extends Configured implements Tool {
 
     public static class Mappa extends MapReduceBase
-            implements Mapper<IntWritable, MDFWritable, Text, IntWritable> {
+            implements Mapper<IntWritable, MDFSongTags, Text, IntWritable> {
 
         @Override
-        public void map(IntWritable key, MDFWritable value, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
-            output.collect(value.tags.getArtist(), new IntWritable(1));
-
+        public void map(IntWritable key, MDFSongTags tags,
+                        OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
+             output.collect(tags.getArtist(), new IntWritable(1));
         }
     }
 
@@ -35,28 +39,23 @@ public class CountArtistSongs extends Configured implements Tool {
             implements Reducer<Text, IntWritable, Text, IntWritable> {
 
         @Override
-        public void reduce(Text key, Iterator<IntWritable> values, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
-
+        public void reduce(Text text, Iterator<IntWritable> values,
+                           OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
             int sum = 0;
             while(values.hasNext()) {
                 sum += values.next().get();
             }
-            output.collect(key, new IntWritable(sum));
-
+            output.collect(text, new IntWritable(sum));
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        int res = ToolRunner.run(new Configuration(), new CountArtistSongs(), args);
-        System.exit(res);
-    }
 
     @Override
     public int run(String[] args) throws Exception {
 
 
         Configuration conf = getConf();
-        JobConf job = new JobConf(conf, CountArtistSongs.class);
+        JobConf job = new JobConf(conf, CASFromTagsMap.class);
 
         if(args.length != 2) {
             System.out.println("Usage: <in> <out>");
@@ -68,10 +67,10 @@ public class CountArtistSongs extends Configured implements Tool {
         FileInputFormat.setInputPaths(job, pIn);
         FileOutputFormat.setOutputPath(job, pOut);
 
-        job.setJobName("MapTouch");
+
+        job.setJobName("CASFromTagsMap");
         job.setMapperClass(Mappa.class);
         job.setReducerClass(Reducca.class);
-
 
         job.setInputFormat(SequenceFileInputFormat.class);
         job.setMapOutputKeyClass(Text.class);
@@ -86,5 +85,10 @@ public class CountArtistSongs extends Configured implements Tool {
         return 0;
     }
 
+    public static void main(String[] args) throws Exception {
 
+        int res = ToolRunner.run(new Configuration(), new CASFromTagsMap(), args);
+        System.exit(res);
+
+    }
 }
