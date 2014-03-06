@@ -47,11 +47,9 @@ public class MapDecode extends Configured implements Tool {
             fout.close();
               */
 
-            ByteArrayInputStream bis = new ByteArrayInputStream(bytesWritable.getBytes());
-
             MDFWritable mdf;
             try {
-                mdf = new MDFWritable(bis, bytesWritable.getLength(), true);
+                mdf = new MDFWritable(bytesWritable.getBytes(), bytesWritable.getLength(), true);
                 output.collect(text, mdf);
             } catch (DecoderException e) {
                 e.printStackTrace();

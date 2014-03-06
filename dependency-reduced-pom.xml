@@ -27,7 +27,6 @@
               <minimizeJar>true</minimizeJar>
               <artifactSet>
                 <excludes>
-                  <include>org.apache.hadoop.io</include>
                   <exclude>org.apache.hadoop</exclude>
                   <exclude>junit</exclude>
                   <exclude>log4j</exclude>

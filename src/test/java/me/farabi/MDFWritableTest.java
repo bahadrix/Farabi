@@ -1,10 +1,14 @@
 package me.farabi;
 
 import junit.framework.TestCase;
-import org.junit.Assert;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.junit.*;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 
 /**
@@ -15,9 +19,11 @@ import java.io.FilenameFilter;
  */
 public class MDFWritableTest extends TestCase {
 
+
+
     File[] testFiles;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         File sampleDir = new File("target/test-classes");
         testFiles = sampleDir.listFiles(new FilenameFilter() {
@@ -26,24 +32,30 @@ public class MDFWritableTest extends TestCase {
                 return name.toLowerCase().endsWith(".mp3");
             }
         });
+
+
     }
 
-
+    @Test
     public void testMP3IO() throws Exception {
 
 
         for(File file : testFiles) {
 
-                System.out.print("Testing file '" + file.getName() + "' ");
-                MDFWritable mdfFromStream = new MDFWritable(new FileInputStream(file),file.length(), true);
-                MDFWritable mdfFromFile = new MDFWritable(file, true);
+            System.out.print("Testing file '" + file.getName() + "' ");
+            MDFWritable mdfFromStream = new MDFWritable(FileUtils.readFileToByteArray(file),file.length(), true);
+            MDFWritable mdfFromFile = new MDFWritable(file, true);
 
-                //Test tags
-                Assert.assertEquals(mdfFromFile.tags, mdfFromStream.tags);
-                //Test data
-                Assert.assertArrayEquals(mdfFromFile.fileData.getBytes(), mdfFromStream.getFileData().getBytes());
+            //Test tags
+            Assert.assertEquals(mdfFromFile.tags, mdfFromStream.tags);
+            //Test data
+            Assert.assertArrayEquals(mdfFromFile.fileData.getBytes(), mdfFromStream.getFileData().getBytes());
 
-                System.out.println(" [ OK ]");
+            File wavFile = new File(file.getName().replace(".mp3", ".wav"));
+            FileOutputStream fout = new FileOutputStream(wavFile);
+            IOUtils.write(mdfFromStream.fileData.getBytes(),fout);
+            fout.close();
+            System.out.println(" [ OK ] " + wavFile.getAbsolutePath());
 
         }
 

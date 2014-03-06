@@ -3,6 +3,7 @@ package me.farabi;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.UnsupportedTagException;
 import javazoom.jl.decoder.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.IntWritable;
@@ -37,16 +38,16 @@ public class MDFWritable implements Writable {
         tags = new MDFSongTags();
     }
 
-    public MDFWritable(InputStream is, long fileLength, boolean decodeRaw) throws InvalidDataException, IOException, UnsupportedTagException, BitstreamException, DecoderException {
+    public MDFWritable(byte[] fileData, long fileLength, boolean decodeRaw) throws InvalidDataException, IOException, UnsupportedTagException, BitstreamException, DecoderException {
 
         // Get tags ==================================================================
-        tags = new MDFSongTags(is, fileLength, 0);
+        tags = new MDFSongTags(new ByteArrayInputStream(fileData), fileLength, 0);
 
 
         // Get fileData ==============================================================
 
         Decoder decoder = new Decoder();
-        Bitstream stream = new Bitstream(is);
+        Bitstream stream = new Bitstream(new ByteArrayInputStream(fileData));
         ByteArrayOutputStream bout = new ByteArrayOutputStream(1024);
 
         int frameCount = Integer.MAX_VALUE;
@@ -54,6 +55,8 @@ public class MDFWritable implements Writable {
 
         boolean swap = false;
 
+        // Decoded veriyi sifir basiyo gibi gozukuyo ama Lame ile 16bit red deneyince de
+        // tomarla sifir geliyo.
 
         for (int frame = 0; frame < frameCount; frame++) {
             Header header = stream.readFrame();
@@ -77,6 +80,7 @@ public class MDFWritable implements Writable {
             short[] pcm = buff.getBuffer();
             for (short s : pcm) {
                 // bkz: http://stackoverflow.com/a/15187707
+
                 if (swap) {
                     bout.write(s & 0xff);
                     bout.write((s >> 8) & 0xff);
@@ -91,17 +95,18 @@ public class MDFWritable implements Writable {
 
         if (!decodeRaw) {
             setFileData(new BytesWritable(
-                    org.apache.commons.io.IOUtils.toByteArray(is)
+                    fileData
             ));
         } else {
             setFileData(new BytesWritable(
                     bout.toByteArray()
             ));
         }
+
     }
 
     public MDFWritable(File mp3File, boolean decodeRaw) throws IOException, DecoderException, BitstreamException, InvalidDataException, UnsupportedTagException {
-        this(new FileInputStream(mp3File), mp3File.length(), decodeRaw);
+        this(FileUtils.readFileToByteArray(mp3File), mp3File.length(), decodeRaw);
     }
 
     @Override
