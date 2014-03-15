@@ -2,7 +2,7 @@ package me.farabi.audio.dsp.fft;
 
 /**
  * Created by umutcanguney on 15/03/14.
- * Not sure if this is correct, need to come back later.
+ * Not sure if this implementation is correct, need to come back later.
  */
 public class KaiserWindow extends WindowFunction {
     private double alpha;
