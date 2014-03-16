@@ -36,7 +36,7 @@ package me.farabi.audio.dsp.fft;
 
 import java.util.concurrent.Future;
 
-import me.farabi.audio.dsp.ConcurrencyUtils;
+import me.farabi.audio.dsp.utils.ConcurrencyUtils;
 
 /**
  * Computes 1D Discrete Fourier Transform (DFT) of complex and real, single

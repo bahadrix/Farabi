@@ -32,7 +32,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
- package me.farabi.audio.dsp;
+ package me.farabi.audio.dsp.utils;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
