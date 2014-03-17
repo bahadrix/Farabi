@@ -13,6 +13,7 @@ import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Writable;
+import org.apache.log4j.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,8 +24,7 @@ import java.io.IOException;
 
 /**
  * Farabi
- * I think this class gonna replace that MDFDataFile class..
- * Working on it..
+ *
  * User: Bahadir
  * Date: 04.02.2014
  * Time: 09:37
@@ -33,7 +33,7 @@ import java.io.IOException;
 @SuppressWarnings("UnusedDeclaration") // kullanmamis olabiliris ama kullancas, soz!
 public class MDFWritable implements Writable {
 
-
+    private static org.apache.log4j.Logger log = Logger.getLogger(MDFWritable.class);
     public MDFSongTags tags;
 
 
@@ -43,6 +43,7 @@ public class MDFWritable implements Writable {
     protected IntWritable framesize = new IntWritable(0);
     protected BooleanWritable vbr = new BooleanWritable(false);
     protected BytesWritable fileData = new BytesWritable(new byte[]{0});
+    protected BooleanWritable decoded = new BooleanWritable(false);
 
     public MDFWritable() {
         tags = new MDFSongTags();
@@ -56,8 +57,42 @@ public class MDFWritable implements Writable {
 
         // Get fileData ==============================================================
 
+        if (!decodeRaw) { // Set filedata to raw data
+            setFileData(new BytesWritable(
+                    fileData
+            ));
+            setDecoded(false);
+        } else { // Set filedata to decoded data
+            setFileData(new BytesWritable(
+                    decodeByteArray(fileData).toByteArray()
+            ));
+            setDecoded(true);
+        }
+
+    }
+
+    public MDFWritable(File mp3File, boolean decodeRaw) throws IOException, DecoderException, BitstreamException, InvalidDataException, UnsupportedTagException {
+        this(FileUtils.readFileToByteArray(mp3File), mp3File.length(), decodeRaw);
+    }
+
+    /**
+     * Decodes file data if it's not already decoded, and set it to the decoded data.
+     */
+    public void decodeData() {
+        if(!isDecoded()) {
+            setFileData(new BytesWritable(
+                    decodeByteArray(getFileData().getBytes()).toByteArray()
+            ));
+            setDecoded(true);
+        } else {
+            log.error("Data is already decoded");
+        }
+    }
+
+    private ByteArrayOutputStream decodeByteArray(byte[] data) {
+
         Decoder decoder = new Decoder();
-        Bitstream stream = new Bitstream(new ByteArrayInputStream(fileData));
+        Bitstream stream = new Bitstream(new ByteArrayInputStream(data));
         ByteArrayOutputStream bout = new ByteArrayOutputStream(1024);
 
         int frameCount = Integer.MAX_VALUE;
@@ -65,58 +100,49 @@ public class MDFWritable implements Writable {
 
         boolean swap = false;
 
-        // Decoded veriyi sifir basiyo gibi gozukuyo ama Lame ile 16bit red deneyince de
-        // tomarla sifir geliyo.
 
-        for (int frame = 0; frame < frameCount; frame++) {
-            Header header = stream.readFrame();
-            if (header == null) {
-                break;
-            }
-            if (frame == 0) {
-                setOutputChannels(header.mode() == Header.SINGLE_CHANNEL ? 1 : 2);
-                setOutputFrequency(header.frequency());
-                setBitrate(header.bitrate());
-                setFramesize(header.framesize);
-                setVbr(header.vbr());
-                swap = header.frequency() >= 44000; // bkz: http://stackoverflow.com/a/15187707
-                if (!decodeRaw)
+        try {
+            // Decoded veriyi sifir basiyo gibi gozukuyo ama Lame ile 16bit red deneyince de
+            // tomarla sifir geliyo.
+            for (int frame = 0; frame < frameCount; frame++) {
+                Header header = stream.readFrame();
+                if (header == null) {
                     break;
-            }
-
-            buff = (SampleBuffer) decoder.decodeFrame(header, stream);
-
-            //fileData = ArrayUtils.addAll(fileData, buff.getBuffer());
-            short[] pcm = buff.getBuffer();
-            for (short s : pcm) {
-                // bkz: http://stackoverflow.com/a/15187707
-
-                if (swap) {
-                    bout.write(s & 0xff);
-                    bout.write((s >> 8) & 0xff);
-                } else {
-                    bout.write((s >> 8) & 0xff);
-                    bout.write(s & 0xff);
                 }
+                if (frame == 0) {
+                    setOutputChannels(header.mode() == Header.SINGLE_CHANNEL ? 1 : 2);
+                    setOutputFrequency(header.frequency());
+                    setBitrate(header.bitrate());
+                    setFramesize(header.framesize);
+                    setVbr(header.vbr());
+                    swap = header.frequency() >= 44000; // bkz: http://stackoverflow.com/a/15187707
+
+                }
+
+                buff = (SampleBuffer) decoder.decodeFrame(header, stream);
+
+                //fileData = ArrayUtils.addAll(fileData, buff.getBuffer());
+                short[] pcm = buff.getBuffer();
+                for (short s : pcm) {
+                    // bkz: http://stackoverflow.com/a/15187707
+
+                    if (swap) {
+                        bout.write(s & 0xff);
+                        bout.write((s >> 8) & 0xff);
+                    } else {
+                        bout.write((s >> 8) & 0xff);
+                        bout.write(s & 0xff);
+                    }
+                }
+
+                stream.closeFrame();
             }
-
-            stream.closeFrame();
+        } catch (BitstreamException e) {
+            log.error(e);
+        } catch (DecoderException e) {
+            log.error(e);
         }
-
-        if (!decodeRaw) {
-            setFileData(new BytesWritable(
-                    fileData
-            ));
-        } else {
-            setFileData(new BytesWritable(
-                    bout.toByteArray()
-            ));
-        }
-
-    }
-
-    public MDFWritable(File mp3File, boolean decodeRaw) throws IOException, DecoderException, BitstreamException, InvalidDataException, UnsupportedTagException {
-        this(FileUtils.readFileToByteArray(mp3File), mp3File.length(), decodeRaw);
+        return bout;
     }
 
     @Override
@@ -129,6 +155,7 @@ public class MDFWritable implements Writable {
         framesize.write(out);
         vbr.write(out);
         fileData.write(out);
+        decoded.write(out);
     }
 
     @Override
@@ -141,6 +168,7 @@ public class MDFWritable implements Writable {
         framesize.readFields(in);
         vbr.readFields(in);
         fileData.readFields(in);
+        decoded.readFields(in);
     }
 
     public BytesWritable getFileData() {
@@ -193,5 +221,13 @@ public class MDFWritable implements Writable {
 
     public void setVbr(boolean vbr) {
         this.vbr = new BooleanWritable(vbr);
+    }
+
+    public boolean isDecoded() {
+        return decoded.get();
+    }
+
+    private void setDecoded(Boolean decoded) {
+        this.decoded = new BooleanWritable(decoded);
     }
 }

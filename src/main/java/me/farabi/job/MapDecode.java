@@ -14,6 +14,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.log4j.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.io.IOException;
  */
 public class MapDecode extends Configured implements Tool {
 
+    private static org.apache.log4j.Logger log = Logger.getLogger(MapDecode.class);
 
 
     public static class Mappa extends MapReduceBase
@@ -46,21 +48,26 @@ public class MapDecode extends Configured implements Tool {
             fout.write(bytesWritable.getBytes());
             fout.close();
               */
-
+            long startTime;
             MDFWritable mdf;
             try {
+                startTime = System.currentTimeMillis();
                 mdf = new MDFWritable(bytesWritable.getBytes(), bytesWritable.getLength(), true);
                 output.collect(text, mdf);
+
+                log.info(String.format("%s decoded and MDF object collected in %d ms.",
+                        text,
+                        System.currentTimeMillis() - startTime));
             } catch (DecoderException e) {
-                e.printStackTrace();
+                log.error("Decoder exception while creating MDF object for file " + text);
             } catch (BitstreamException e) {
-                e.printStackTrace();
+                log.error("BitstreamException exception while creating MDF object for file " + text);
             } catch (ArrayIndexOutOfBoundsException e) {
-                System.out.println("JLayer sucks for: " + text.toString());
+                log.error("ArrayIndexOutOfBoundsException (may be it's JLayer bug) exception while creating MDF object for file " + text);
             } catch (UnsupportedTagException e) {
-                e.printStackTrace();
+                log.error("UnsupportedTagException exception while creating MDF object for file " + text);
             } catch (InvalidDataException e) {
-                e.printStackTrace();
+                log.error("InvalidDataException exception while creating MDF object for file " + text);
             }
 
 
