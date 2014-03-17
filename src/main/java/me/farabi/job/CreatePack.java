@@ -2,8 +2,10 @@ package me.farabi.job;
 
 import com.mpatric.mp3agic.UnsupportedTagException;
 import me.farabi.MDFWritable;
+import me.farabi.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.MapFile;
@@ -49,7 +51,7 @@ public class CreatePack {
         String opts;
         File localDir = null;
 
-        // Argument handling
+        // Argument handling ============================================================
         String arg;
         int noargCnt = 0;
         for(int i = 0; i < args.length; i++) {
@@ -74,26 +76,26 @@ public class CreatePack {
                     errorOut(ErrorType.ARGUMENT, "Argument needs parameter");
                 }
             }
-
-
-
         }
         if(noargCnt != 2) {
-            errorOut(ErrorType.ARGUMENT, "Please give path arguments");
+            errorOut(ErrorType.ARGUMENT, "Missing path arguments.");
         }
         // EOF argument handling
 
-        //Oup-tputpath always ends with '/'
+        //outputPath always ends with '/'
         if(!outputPath.endsWith("/"))
             outputPath += "/";
 
-
         assert localDir != null;
         if(!localDir.isDirectory()) {
-            errorOut(ErrorType.ARGUMENT, "Specified local path '" + localDir.getAbsolutePath() + "' is not a directory");
+            errorOut(ErrorType.ARGUMENT,
+                    "Specified local path '" + localDir.getAbsolutePath() + "' is not a directory");
         }
 
+        // Get local files ==============================================================
+
         log.debug("Getting file list...");
+
 
         File[] mp3files = localDir.listFiles(new FilenameFilter() {
             @Override
@@ -108,7 +110,18 @@ public class CreatePack {
             errorOut(ErrorType.NOWORKTODO, "No mp3 files found under " + localDir.getAbsolutePath());
         }
 
+        // Delete output path if exist. =================================================
+        try {
+            boolean outputCleared = Util.deleteHDFSFile(new Path(outputPath));
+            if(outputCleared)
+                log.info("Output path '" + outputPath + "' deleted.");
+        } catch (IOException e) {
+            log.error("Can't clear existing output path " + outputPath);
+        }
+
+        // Create package
         create(mp3files, localDir.getName());
+
         System.exit(0);
     }
 
@@ -132,27 +145,31 @@ public class CreatePack {
             writerAudio = new MapFile.Writer(conf, fs, outputPath + mapName + "_audio", key.getClass(), value.getClass());
             //noinspection deprecation
             writerTags  = new MapFile.Writer(conf, fs, outputPath + mapName + "_tags",  key.getClass(), value.tags.getClass());
-            log.debug("Started");
+            log.info("Packaging started");
             int i = 0;
             for(File file : mp3Files) {  i++;
-                if(maxFiles != 0 && maxFiles == i) {
-                    log.info("Max file limit reached");
-                    break;
-                }
+
                 temp =  " \"" + file.getName() + "\" ";
-                log.debug("Adding file " + String.valueOf(i) + temp );
+
                 try {
                     key.set(i);
                     value = new MDFWritable(file, decodeFiles);
                     writerAudio.append(key, value);
                     writerTags.append(key, value.tags);
-                    log.info("[ ADDED ]" + String.format("%s %.2f secs", temp, (double) (System.currentTimeMillis() - tempTime) / 1000));
+                    log.info("File added " + String.format("%s %.2f secs", temp, (double) (System.currentTimeMillis() - tempTime) / 1000));
                 } catch (UnsupportedTagException e) {
-                    log.error("[FAIL]: ID3Exception. \n" + e.getMessage());
+                    log.error("ID3Exception error on packing file " + temp);
+                    log.error(e);
                 } catch (Exception e) {
+                    log.error("Error on packing file " + temp);
                     log.error(e);
                 }
                 tempTime = System.currentTimeMillis();
+
+                if(maxFiles != 0 && maxFiles == i) {
+                    log.info("Max file limit reached");
+                    break;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -165,7 +182,6 @@ public class CreatePack {
     }
 
     private static void errorOut(ErrorType t, String info) {
-
 
         if(info != null) {
             log.error(info);
@@ -181,7 +197,6 @@ public class CreatePack {
                 break;
         }
 
-
         System.exit(-1);
     }
 
@@ -192,6 +207,10 @@ public class CreatePack {
     }
 
     private static void showUsage(){
-        System.out.println("USAGE: me.farabi.job.CreatePack [opts] <local_dir> <hdfs_dir>");
+        System.out.println("USAGE: \n" +
+                "me.farabi.job.CreatePack [opts] <local_dir> <hdfs_dir>\n" +
+                "   [opts]\n" +
+                "       -d          : Decode files.\n" +
+                "       -m <num>    : Maximum number of files to be processed.\n");
     }
 }
