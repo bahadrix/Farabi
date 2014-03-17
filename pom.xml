@@ -54,9 +54,8 @@
             <artifactId>jaxb-api</artifactId>
             <version>2.2.11</version>
         </dependency>
-
         <dependency>
-            <!-- my fork of mpatric that enabled reading tags from streams -->
+            <!-- my fork of mpatric that enables reading tags from streams -->
             <groupId>com.mpatric</groupId>
             <artifactId>mp3agic</artifactId>
             <version>0.8.3-BAHA-SNAPSHOT</version>
@@ -66,8 +65,6 @@
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
         </dependency>
-
-
     </dependencies>
     <build>
         <plugins>
@@ -95,14 +92,20 @@
                             <minimizeJar>true</minimizeJar>
                             <artifactSet>
                                 <excludes>
-                                    <!-- Hadoop libs is already included in running machine's classpath, so exclude them -->
+                                    <!-- Some libs are already included in running machine's classpath,
+                                    we excluded them -->
                                     <exclude>org.apache.hadoop</exclude>
-
-                                    <!-- junit is for test purposes only -->
                                     <exclude>junit</exclude>
-
-                                    <!-- I think Hadoop already got that, we'll see that in next run -->
+                                    <exclude>org.apache.mrunit</exclude>
                                     <exclude>log4j</exclude>
+                                    <exclude>org.xerial.snappy</exclude>
+                                    <exclude>org.mockito</exclude>
+                                    <exclude>org.codehaus.jackson</exclude>
+                                    <exclude>org.objenesis</exclude>
+                                    <exclude>org.apache.avro</exclude>
+                                    <exclude>com.google.protobuf</exclude>
+                                    <exclude>com.google.common</exclude>
+                                    <exclude>org.slf4j</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>
