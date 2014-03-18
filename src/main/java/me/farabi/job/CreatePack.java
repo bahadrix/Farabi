@@ -77,6 +77,7 @@ public class CreatePack {
                 }
             }
         }
+
         if(noargCnt != 2) {
             errorOut(ErrorType.ARGUMENT, "Missing path arguments.");
         }
