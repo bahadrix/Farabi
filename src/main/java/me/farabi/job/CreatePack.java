@@ -143,9 +143,10 @@ public class CreatePack {
 
             // Tamam bu deprecated da yerine ne kullancas a.
             //noinspection deprecation
-            writerAudio = new MapFile.Writer(conf, fs, outputPath + mapName + "_audio", key.getClass(), value.getClass());
+            writerAudio = new MapFile.Writer(conf, fs, outputPath + "all", key.getClass(), value.getClass());
             //noinspection deprecation
-            writerTags  = new MapFile.Writer(conf, fs, outputPath + mapName + "_tags",  key.getClass(), value.tags.getClass());
+            writerTags  = new MapFile.Writer(conf, fs, outputPath + "tags",  key.getClass(), value.tags.getClass());
+
             log.info("Packaging started");
             int i = 0;
             for(File file : mp3Files) {  i++;
