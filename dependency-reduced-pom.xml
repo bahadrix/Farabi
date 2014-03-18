@@ -53,12 +53,16 @@
       <name>Bahadir's Repo</name>
       <url>http://repo.bahadir.me</url>
     </repository>
+    <repository>
+      <id>Morphia repository</id>
+      <url>http://morphia.googlecode.com/svn/mavenrepo</url>
+    </repository>
   </repositories>
   <dependencies>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
-      <version>2.2.0</version>
+      <version>1.1.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

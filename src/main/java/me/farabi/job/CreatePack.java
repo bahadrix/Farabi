@@ -9,16 +9,13 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.MapFile;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Farabi
@@ -27,16 +24,17 @@ import java.net.URI;
  *
  * $ hadoop jar ~/Farabi-1.0-SNAPSHOT.jar me.farabi.job.PutSeparated -d ~/mp3 farabi/inputseq3
  *
+ * Yerel dizindeki ilk iki mp3 dosyasini al ve decode da yap:
+ * $ ./farabi me.farabi.job.CreatePack ~/mp3 /farabi/sil -d -m 2
+ *
  * MP3 tagleri icin ayri bir map dosyasi olusturur ancak bu bilgiler asil map dosyasinda da vardir.
  *
 
  */
 public class CreatePack {
 
-    private static org.apache.log4j.Logger log = Logger.getLogger(CreatePack.class);
-    static {
-        log.setLevel(Level.DEBUG);
-    }
+    private static org.apache.log4j.Logger log = Util.getLogger(CreatePack.class);
+
     static enum ErrorType {ARGUMENT, NOWORKTODO}
 
     private static long startTime;
@@ -49,45 +47,35 @@ public class CreatePack {
     public static void main(String[] args) {
 
         String opts;
-        File localDir = null;
+        File localDir;
 
         // Argument handling ============================================================
-        String arg;
-        int noargCnt = 0;
-        for(int i = 0; i < args.length; i++) {
-            arg = args[i];
-            if(!arg.startsWith("-")){ //Get directory arguments
-                noargCnt++;
-                if(noargCnt > 2) {
-                    errorOut(ErrorType.ARGUMENT, "Wrong folder arguments");
-                } else if(noargCnt == 1) {
-                    localDir = new File(arg);
-                } else if(noargCnt == 2) {
-                    outputPath = arg;
-                }
+
+        Map<String, List<String>> arguments = Util.parseProgramArguments(args);
+
+        if(arguments.get("_") == null) {
+            errorOut(ErrorType.ARGUMENT, "Missing path arguments.");
+        } else if(arguments.get("_").size() != 2) {
+            errorOut(ErrorType.ARGUMENT, "Wrong number of path arguments.");
+        }
+
+        localDir = new File(arguments.get("_").get(0));
+        outputPath = arguments.get("_").get(1);
+        decodeFiles = arguments.get("-d") != null;
+        if(arguments.get("-m") != null) {
+            if(arguments.get("-m").size() == 1) {
+                maxFiles = Integer.parseInt(arguments.get("-m").get(0));
             } else {
-                try {
-                    if(arg.equals("-d")) {
-                        decodeFiles = true;
-                    } else if (arg.equals("-m")) {
-                        maxFiles = Integer.parseInt(args[++i]);
-                    }
-                }catch (IndexOutOfBoundsException e) {
-                    errorOut(ErrorType.ARGUMENT, "Argument needs parameter");
-                }
+                errorOut(ErrorType.ARGUMENT, "-m parameter error.");
             }
         }
 
-        if(noargCnt != 2) {
-            errorOut(ErrorType.ARGUMENT, "Missing path arguments.");
-        }
         // EOF argument handling
 
         //outputPath always ends with '/'
         if(!outputPath.endsWith("/"))
             outputPath += "/";
 
-        assert localDir != null;
         if(!localDir.isDirectory()) {
             errorOut(ErrorType.ARGUMENT,
                     "Specified local path '" + localDir.getAbsolutePath() + "' is not a directory");
@@ -132,7 +120,7 @@ public class CreatePack {
         long tempTime = startTime;
         MapFile.Writer writerAudio = null;
         MapFile.Writer writerTags = null;
-        String temp = "";
+        String temp;
         try {
             Configuration conf = new Configuration();
             conf.set("mapred.child.java.opts", "-Xmx2048m");

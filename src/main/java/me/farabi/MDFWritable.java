@@ -49,11 +49,18 @@ public class MDFWritable implements Writable {
         tags = new MDFSongTags();
     }
 
-    public MDFWritable(byte[] fileData, long fileLength, boolean decodeRaw) throws InvalidDataException, IOException, UnsupportedTagException, BitstreamException, DecoderException {
+    public MDFWritable(byte[] fileData, long fileLength, boolean decodeRaw) {
 
         // Get tags ==================================================================
-        tags = new MDFSongTags(new ByteArrayInputStream(fileData), fileLength, 0);
+        try {
+            tags = new MDFSongTags(new ByteArrayInputStream(fileData), fileLength, 0);
+        } catch (Exception e) {
+            log.error("Tag reading error.");
+            log.error(e);
+        }
 
+        // Read header ===============================================================
+        readHeader(fileData);
 
         // Get fileData ==============================================================
 
@@ -77,6 +84,7 @@ public class MDFWritable implements Writable {
 
     /**
      * Decodes file data if it's not already decoded, and set it to the decoded data.
+     * Once the method called you can't call decodeStream. Because encoded data is replaced.
      */
     public void decodeData() {
         if(!isDecoded()) {
@@ -89,7 +97,54 @@ public class MDFWritable implements Writable {
         }
     }
 
-    private ByteArrayOutputStream decodeByteArray(byte[] data) {
+    /**
+     * Returns decoded bytes stream if file is not already decoded.
+     * @return Decoded bytes stream.
+     */
+    public ByteArrayOutputStream decodeStream() {
+        if(isDecoded()) {
+            log.error("File is already decoded. You can use directly fileData as decoded.");
+            return null;
+        }
+
+        return decodeByteArray(getFileData().getBytes());
+
+    }
+
+    /**
+     * Reads data into this objects header properties
+     * @param data Encoded mp3 bytes
+     */
+    private void readHeader(byte[] data) {
+
+        Bitstream stream = new Bitstream(new ByteArrayInputStream(data));
+
+        boolean swap = false;
+
+        try {
+
+            Header header = stream.readFrame();
+
+            setOutputChannels(header.mode() == Header.SINGLE_CHANNEL ? 1 : 2);
+            setOutputFrequency(header.frequency());
+            setBitrate(header.bitrate());
+            setFramesize(header.framesize);
+            setVbr(header.vbr());
+
+        } catch (BitstreamException e) {
+            log.error("Header reading error");
+            log.error(e);
+        } finally {
+            stream.closeFrame();
+        }
+    }
+
+    /**
+     * Decodes given file bytes into a stream.
+     * @param data Encoded MP3 file bytes.
+     * @return Decoded bytes stream.
+     */
+    public static ByteArrayOutputStream decodeByteArray(byte[] data) {
 
         Decoder decoder = new Decoder();
         Bitstream stream = new Bitstream(new ByteArrayInputStream(data));
@@ -110,22 +165,15 @@ public class MDFWritable implements Writable {
                     break;
                 }
                 if (frame == 0) {
-                    setOutputChannels(header.mode() == Header.SINGLE_CHANNEL ? 1 : 2);
-                    setOutputFrequency(header.frequency());
-                    setBitrate(header.bitrate());
-                    setFramesize(header.framesize);
-                    setVbr(header.vbr());
                     swap = header.frequency() >= 44000; // bkz: http://stackoverflow.com/a/15187707
-
                 }
 
                 buff = (SampleBuffer) decoder.decodeFrame(header, stream);
 
-                //fileData = ArrayUtils.addAll(fileData, buff.getBuffer());
+
                 short[] pcm = buff.getBuffer();
                 for (short s : pcm) {
                     // bkz: http://stackoverflow.com/a/15187707
-
                     if (swap) {
                         bout.write(s & 0xff);
                         bout.write((s >> 8) & 0xff);
@@ -138,8 +186,10 @@ public class MDFWritable implements Writable {
                 stream.closeFrame();
             }
         } catch (BitstreamException e) {
+            log.error("Decoding error");
             log.error(e);
         } catch (DecoderException e) {
+            log.error("Decoding error");
             log.error(e);
         }
         return bout;
