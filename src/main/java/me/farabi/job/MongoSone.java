@@ -27,12 +27,12 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Farabi
- * Paketteki decode edilmemiş doyaları okuyarak meta verileri mongoya
+ * Adım 2: İşle
+ * Paketteki decode edilmemiş doyaları okuyup işleyerek meta verileri mongoya
  * yazar.
  *
  * Örnek:
- * $ ./farabi me.farabi.job.MongoSone farabi/pack1/all/data farabi/mongout ttlinux1.hdcluster
+ * $ me.farabi.job.MongoSone farabi/pack1/all/data farabi/mongout ttlinux1.hdcluster
 
  *
  * User: Bahadir

@@ -18,18 +18,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Farabi
+ * Adım 1: Paketle
  * Yerel MP3 dosyalarini okuyarak HDFS uzerinde tek bir map dosyasına paketler.
  * Bir map/reduce job'i olmasada hadoop jar ile asagidaki gibi calistirilabilir.
  *
- * $ hadoop jar ~/Farabi-1.0-SNAPSHOT.jar me.farabi.job.PutSeparated -d ~/mp3 farabi/inputseq3
+ * $ me.farabi.job.PutSeparated -d ~/mp3 farabi/inputseq3
  *
  * Yerel dizindeki ilk iki mp3 dosyasini al ve decode da yap:
- * $ ./farabi me.farabi.job.CreatePack ~/mp3 /farabi/sil -d -m 2
+ * $ me.farabi.job.CreatePack ~/mp3 /farabi/sil -d -m 2
  *
  * MP3 tagleri icin ayri bir map dosyasi olusturur ancak bu bilgiler asil map dosyasinda da vardir.
  *
-
  */
 public class CreatePack {
 
