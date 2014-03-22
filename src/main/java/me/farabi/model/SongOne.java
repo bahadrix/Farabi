@@ -28,6 +28,8 @@ public class SongOne {
         public String album = "<unknown>";
         public String genreDesc = "<unknown>";
         public String year = "<unknown>";
+
+
     }
 
     @SuppressWarnings("FieldCanBeLocal")

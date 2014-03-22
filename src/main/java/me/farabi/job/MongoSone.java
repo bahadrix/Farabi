@@ -32,7 +32,7 @@ import java.util.Properties;
  * yazar.
  *
  * Örnek:
- * $ me.farabi.job.MongoSone farabi/pack1/all/data farabi/mongout ttlinux1.hdcluster
+ * $  me.farabi.job.MongoSone farabi/pack1/all/data farabi/mongout
 
  *
  * User: Bahadir
@@ -64,6 +64,10 @@ public class MongoSone extends Configured implements Tool {
 
             //Decode, fft gibi işlemler burada yapılırsa leziz olur.
             // Sonucu mongodb'ye aşağıdaki gibi yazılabilir.
+
+            SongOne so = SongOne.createFromMDF(mdf);
+
+
             ds.save(SongOne.createFromMDF(mdf));
 
         }
