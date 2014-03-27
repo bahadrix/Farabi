@@ -6,6 +6,7 @@ import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import me.farabi.Util;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -14,6 +15,7 @@ import org.junit.Test;
  * Date: 18.03.2014
  * Time: 11:08
  */
+ @Ignore
 public class SongOneTest {
 
     private static org.apache.log4j.Logger log = Util.getLogger(SongOneTest.class);

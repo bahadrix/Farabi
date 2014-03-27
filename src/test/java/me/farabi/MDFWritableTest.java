@@ -17,7 +17,7 @@ import java.io.FilenameFilter;
  * Date: 04.02.2014
  * Time: 14:56
  */
-
+@Ignore
 public class MDFWritableTest extends TestCase {
 
 
