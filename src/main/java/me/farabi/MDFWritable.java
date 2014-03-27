@@ -1,15 +1,5 @@
 package me.farabi;
 
-import com.mpatric.mp3agic.InvalidDataException;
-import com.mpatric.mp3agic.UnsupportedTagException;
-import javazoom.jl.decoder.Bitstream;
-import javazoom.jl.decoder.BitstreamException;
-import javazoom.jl.decoder.Decoder;
-import javazoom.jl.decoder.DecoderException;
-import javazoom.jl.decoder.Header;
-import javazoom.jl.decoder.SampleBuffer;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.IntWritable;
@@ -18,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import javax.sound.sampled.*;
 import java.io.*;
+import java.util.Map;
 
 /**
  * Farabi
@@ -48,35 +39,35 @@ public class MDFWritable implements Writable {
 
     /**
      * From this version we always save encoded data in MDFWritable
-     * @param inputStream MP3 FileInputStream
+     * @param byteArray All bytes of file
      * @throws IOException
      * @throws UnsupportedAudioFileException
      */
-    public MDFWritable(InputStream inputStream) throws IOException, UnsupportedAudioFileException {
-        byte[] fileData = IOUtils.toByteArray(inputStream);
+    public MDFWritable(byte[] byteArray) throws IOException, UnsupportedAudioFileException {
 
-        // Mark/Read hatasini gidermek icin boyle bir yol denedim.
-        // Bu sefer file not supported hatasi geliyo.
-        ByteArrayInputStream bis = new ByteArrayInputStream(fileData);
+        ByteArrayInputStream binStream = new ByteArrayInputStream(byteArray);
 
-        AudioFileFormat fileFormat = AudioSystem.getAudioFileFormat(bis);
+        AudioFileFormat fileFormat = AudioSystem.getAudioFileFormat(binStream);
         tags = new MDFSongTags(fileFormat);
 
-        AudioInputStream in = AudioSystem.getAudioInputStream(inputStream);
+        AudioInputStream in = AudioSystem.getAudioInputStream(binStream);
         AudioFormat baseFormat = in.getFormat();
 
         /**
          * We set some properties at this constrution time.
          * For a full list see 'no-tag' in test/resources/tag-states.txt
          */
+
+        Map props = fileFormat.properties();
+
         setOutputChannels(baseFormat.getChannels());
-        setOutputFrequency(Integer.parseInt((String)fileFormat.getProperty("mp3.frequency.hz")));
-        setBitrate(Integer.parseInt((String)fileFormat.getProperty("mp3.bitrate.nominal.bps")));
-        setFramesize(Integer.parseInt((String)fileFormat.getProperty("mp3.framesize.bytes")));
-        setVbr(((String) fileFormat.getProperty("mp3.vbr")).equals("true")); 
+        setOutputFrequency((Integer)props.get("mp3.frequency.hz"));
+        setBitrate((Integer) props.get("mp3.bitrate.nominal.bps"));
+        setFramesize((Integer)props.get("mp3.framesize.bytes"));
+        setVbr((Boolean)props.get("mp3.vbr"));
 
         //Set encoded data
-        setFileData(new BytesWritable(fileData));
+        setFileData(new BytesWritable(byteArray));
 
     }
 

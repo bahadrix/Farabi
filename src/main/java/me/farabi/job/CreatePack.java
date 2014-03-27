@@ -1,6 +1,5 @@
 package me.farabi.job;
 
-import com.mpatric.mp3agic.UnsupportedTagException;
 import me.farabi.MDFWritable;
 import me.farabi.Util;
 import org.apache.hadoop.conf.Configuration;
@@ -10,10 +9,7 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.MapFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -141,7 +137,11 @@ public class CreatePack {
 
                 try {
                     key.set(i);
-                    value = new MDFWritable(new FileInputStream(file));
+                    value = new MDFWritable(
+                            org.apache.commons.io.IOUtils.toByteArray(
+                                    new FileInputStream(file)
+                            )
+                    );
                     writerAudio.append(key, value);
                     writerTags.append(key, value.tags);
                     log.info("File added " + String.format("%s %.2f secs", temp, (double) (System.currentTimeMillis() - tempTime) / 1000));
