@@ -69,11 +69,17 @@
             <artifactId>morphia</artifactId>
             <version>0.99</version>
         </dependency>
-        <dependency><!-- jlayer alternative -->
+        <dependency><!-- jlayer uppercut -->
             <groupId>com.googlecode.soundlibs</groupId>
             <artifactId>mp3spi</artifactId>
             <version>1.9.5-1</version>
         </dependency>
+        <dependency><!-- sound proc. tools -->
+            <groupId>com.googlecode.soundlibs</groupId>
+            <artifactId>tritonus-share</artifactId>
+            <version>0.3.7-2</version>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>

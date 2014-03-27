@@ -11,6 +11,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.MapFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URI;
@@ -39,7 +40,6 @@ public class CreatePack {
     private static long startTime;
 
     private static String outputPath;
-    private static boolean decodeFiles = false;
     private static int maxFiles = 0;
 
     @SuppressWarnings("UnusedDeclaration")
@@ -60,7 +60,6 @@ public class CreatePack {
 
         localDir = new File(arguments.get("_").get(0));
         outputPath = arguments.get("_").get(1);
-        decodeFiles = arguments.get("-d") != null;
         if(arguments.get("-m") != null) {
             if(arguments.get("-m").size() == 1) {
                 maxFiles = Integer.parseInt(arguments.get("-m").get(0));
@@ -142,16 +141,14 @@ public class CreatePack {
 
                 try {
                     key.set(i);
-                    value = new MDFWritable(file, decodeFiles);
+                    value = new MDFWritable(new FileInputStream(file));
                     writerAudio.append(key, value);
                     writerTags.append(key, value.tags);
                     log.info("File added " + String.format("%s %.2f secs", temp, (double) (System.currentTimeMillis() - tempTime) / 1000));
-                } catch (UnsupportedTagException e) {
-                    log.error("ID3Exception error on packing file " + temp);
-                    log.error(e);
                 } catch (Exception e) {
                     log.error("Error on packing file " + temp);
                     log.error(e);
+                    e.printStackTrace();
                 }
                 tempTime = System.currentTimeMillis();
 
@@ -199,7 +196,6 @@ public class CreatePack {
         System.out.println("USAGE: \n" +
                 "me.farabi.job.CreatePack [opts] <local_dir> <hdfs_dir>\n" +
                 "   [opts]\n" +
-                "       -d          : Decode files.\n" +
                 "       -m <num>    : Maximum number of files to be processed.\n");
     }
 }

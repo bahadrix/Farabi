@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
+import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -45,7 +46,15 @@ public class DecodeTest extends TestCase {
     @Test
     public void testMP3SPI() throws Exception{
 
-        File testFile = testFiles[0];
+        File testFile = null;
+        for(File file : testFiles) {
+            if(file.getName().contains("notag.mp3")) {
+                testFile = file;
+                break;
+            }
+        }
+        assertNotNull(testFile);
+
         File testOutputFile = new File(testFile.getAbsolutePath().replace(".mp3",".wav"));
         testOutputFile.createNewFile();
 
@@ -55,10 +64,16 @@ public class DecodeTest extends TestCase {
         AudioInputStream ain = AudioSystem.getAudioInputStream(testFile);
         assertNotNull(ain);
 
+        AudioFileFormat baseFileFormat = AudioSystem.getAudioFileFormat(testFile);
+
+
+
+
         /**
          * Example derived from following url.
          * @see http://www.javalobby.org/java/forums/t18465.html
          */
+
 
         AudioFormat baseFormat = ain.getFormat();
         AudioFormat decodedFormat = new AudioFormat(

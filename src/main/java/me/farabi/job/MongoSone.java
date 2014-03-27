@@ -21,6 +21,8 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -52,10 +54,11 @@ public class MongoSone extends Configured implements Tool {
             super.setup(context);
             String host = context.getConfiguration().get("mongodb.server.host");
             int port = Integer.parseInt(context.getConfiguration().get("mongodb.server.port"));
+            String dbname = context.getConfiguration().get("mongodb.db");
             MongoClient mongo = new MongoClient( host , port );
 
             Morphia morphia = new Morphia();
-            ds = morphia.createDatastore(mongo, "testdb", null, null);
+            ds = morphia.createDatastore(mongo, dbname, null, null);
 
         }
 
@@ -67,8 +70,23 @@ public class MongoSone extends Configured implements Tool {
 
             SongOne so = SongOne.createFromMDF(mdf);
 
+            try {
+                /**
+                 * getDecodeStream parameteresi olarak AudioFormat verilebilir.
+                 * Aşağıdaki gibi verilmezse default format yapar.
+                 * @see me.farabi.MDFWritable
+                 */
+                AudioInputStream decodedStream = mdf.getDecodeStream();
 
-            ds.save(SongOne.createFromMDF(mdf));
+                // burada deceodeStream üzerinden yardiririyoruz.
+
+                ds.save(SongOne.createFromMDF(mdf));
+
+            } catch (UnsupportedAudioFileException e) {
+                log.error("Error on getting decoded stream");
+            }
+
+            log.info("File decoded and it's meta saved to mongo.");
 
         }
 
@@ -101,6 +119,7 @@ public class MongoSone extends Configured implements Tool {
 
         String mongoHost = String.valueOf(props.get("mongodb.server.host"));
         String mongoPort = String.valueOf(props.get("mongodb.server.port"));
+        String mongoDBName = String.valueOf(props.get("mongodb.db"));
 
         // Check mongo db server
         if(!Util.checkMongoDBServer(mongoHost, mongoPort))
@@ -108,6 +127,7 @@ public class MongoSone extends Configured implements Tool {
 
         conf.set("mongodb.server.host", mongoHost);
         conf.set("mongodb.server.port", mongoPort);
+        conf.set("mongodb.db", mongoDBName);
 
         log.info("MongoDB server: " + mongoHost + ":" + mongoPort);
 

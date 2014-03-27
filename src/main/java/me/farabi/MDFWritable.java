@@ -9,18 +9,15 @@ import javazoom.jl.decoder.DecoderException;
 import javazoom.jl.decoder.Header;
 import javazoom.jl.decoder.SampleBuffer;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.File;
-import java.io.IOException;
+import javax.sound.sampled.*;
+import java.io.*;
 
 /**
  * Farabi
@@ -43,157 +40,91 @@ public class MDFWritable implements Writable {
     protected IntWritable framesize = new IntWritable(0);
     protected BooleanWritable vbr = new BooleanWritable(false);
     protected BytesWritable fileData = new BytesWritable(new byte[]{0});
-    protected BooleanWritable decoded = new BooleanWritable(false);
+
 
     public MDFWritable() {
         tags = new MDFSongTags();
     }
 
-    public MDFWritable(byte[] fileData, long fileLength, boolean decodeRaw) {
-
-        // Get tags ==================================================================
-        try {
-            tags = new MDFSongTags(new ByteArrayInputStream(fileData), fileLength, 0);
-        } catch (Exception e) {
-            log.error("Tag reading error.");
-            log.error(e);
-        }
-
-        // Read header ===============================================================
-        readHeader(fileData);
-
-        // Get fileData ==============================================================
-
-        if (!decodeRaw) { // Set filedata to raw data
-            setFileData(new BytesWritable(
-                    fileData
-            ));
-            setDecoded(false);
-        } else { // Set filedata to decoded data
-            setFileData(new BytesWritable(
-                    decodeByteArray(fileData).toByteArray()
-            ));
-            setDecoded(true);
-        }
-
-    }
-
-    public MDFWritable(File mp3File, boolean decodeRaw) throws IOException, DecoderException, BitstreamException, InvalidDataException, UnsupportedTagException {
-        this(FileUtils.readFileToByteArray(mp3File), mp3File.length(), decodeRaw);
-    }
-
     /**
-     * Decodes file data if it's not already decoded, and set it to the decoded data.
-     * Once the method called you can't call decodeStream. Because encoded data is replaced.
+     * From this version we always save encoded data in MDFWritable
+     * @param inputStream MP3 FileInputStream
+     * @throws IOException
+     * @throws UnsupportedAudioFileException
      */
-    public void decodeData() {
-        if(!isDecoded()) {
-            setFileData(new BytesWritable(
-                    decodeByteArray(getFileData().getBytes()).toByteArray()
-            ));
-            setDecoded(true);
-        } else {
-            log.error("Data is already decoded");
-        }
-    }
+    public MDFWritable(InputStream inputStream) throws IOException, UnsupportedAudioFileException {
+        byte[] fileData = IOUtils.toByteArray(inputStream);
 
-    /**
-     * Returns decoded bytes stream if file is not already decoded.
-     * @return Decoded bytes stream.
-     */
-    public ByteArrayOutputStream decodeStream() {
-        if(isDecoded()) {
-            log.error("File is already decoded. You can use directly fileData as decoded.");
-            return null;
-        }
+        // Mark/Read hatasini gidermek icin boyle bir yol denedim.
+        // Bu sefer file not supported hatasi geliyo.
+        ByteArrayInputStream bis = new ByteArrayInputStream(fileData);
 
-        return decodeByteArray(getFileData().getBytes());
+        AudioFileFormat fileFormat = AudioSystem.getAudioFileFormat(bis);
+        tags = new MDFSongTags(fileFormat);
+
+        AudioInputStream in = AudioSystem.getAudioInputStream(inputStream);
+        AudioFormat baseFormat = in.getFormat();
+
+        /**
+         * We set some properties at this constrution time.
+         * For a full list see 'no-tag' in test/resources/tag-states.txt
+         */
+        setOutputChannels(baseFormat.getChannels());
+        setOutputFrequency(Integer.parseInt((String)fileFormat.getProperty("mp3.frequency.hz")));
+        setBitrate(Integer.parseInt((String)fileFormat.getProperty("mp3.bitrate.nominal.bps")));
+        setFramesize(Integer.parseInt((String)fileFormat.getProperty("mp3.framesize.bytes")));
+        setVbr(((String) fileFormat.getProperty("mp3.vbr")).equals("true")); 
+
+        //Set encoded data
+        setFileData(new BytesWritable(fileData));
 
     }
 
     /**
-     * Reads data into this objects header properties
-     * @param data Encoded mp3 bytes
+     * Get decode stream with default output format of
+     * PCM_SIGNED 44100.0 Hz, 16 bit, stereo, 4 bytes/frame, big-endian
+     * @return Decoded stream of fileData
+     * @throws IOException
+     * @throws UnsupportedAudioFileException
      */
-    private void readHeader(byte[] data) {
-
-        Bitstream stream = new Bitstream(new ByteArrayInputStream(data));
-
-        boolean swap = false;
-
-        try {
-
-            Header header = stream.readFrame();
-
-            setOutputChannels(header.mode() == Header.SINGLE_CHANNEL ? 1 : 2);
-            setOutputFrequency(header.frequency());
-            setBitrate(header.bitrate());
-            setFramesize(header.framesize);
-            setVbr(header.vbr());
-
-        } catch (BitstreamException e) {
-            log.error("Header reading error");
-            log.error(e);
-        } finally {
-            stream.closeFrame();
-        }
+    public AudioInputStream getDecodeStream() throws IOException, UnsupportedAudioFileException {
+        return getDecodeStream(null);
     }
 
     /**
-     * Decodes given file bytes into a stream.
-     * @param data Encoded MP3 file bytes.
-     * @return Decoded bytes stream.
+     *
+     * @param outputFormat Format of decoded output
+     * @return Decoded stream of fileData
+     * @throws IOException
+     * @throws UnsupportedAudioFileException
      */
-    public static ByteArrayOutputStream decodeByteArray(byte[] data) {
+    public AudioInputStream getDecodeStream(AudioFormat outputFormat) throws IOException, UnsupportedAudioFileException {
+        AudioInputStream decodedStream = null;
 
-        Decoder decoder = new Decoder();
-        Bitstream stream = new Bitstream(new ByteArrayInputStream(data));
-        ByteArrayOutputStream bout = new ByteArrayOutputStream(1024);
+        ByteArrayInputStream bis = new ByteArrayInputStream(getFileData().getBytes());
+        AudioInputStream in = AudioSystem.getAudioInputStream(bis);
 
-        int frameCount = Integer.MAX_VALUE;
-        SampleBuffer buff;
-
-        boolean swap = false;
-
-
-        try {
-            // Decoded veriyi sifir basiyo gibi gozukuyo ama Lame ile 16bit red deneyince de
-            // tomarla sifir geliyo.
-            for (int frame = 0; frame < frameCount; frame++) {
-                Header header = stream.readFrame();
-                if (header == null) {
-                    break;
-                }
-                if (frame == 0) {
-                    swap = header.frequency() >= 44000; // bkz: http://stackoverflow.com/a/15187707
-                }
-
-                buff = (SampleBuffer) decoder.decodeFrame(header, stream);
-
-
-                short[] pcm = buff.getBuffer();
-                for (short s : pcm) {
-                    // bkz: http://stackoverflow.com/a/15187707
-                    if (swap) {
-                        bout.write(s & 0xff);
-                        bout.write((s >> 8) & 0xff);
-                    } else {
-                        bout.write((s >> 8) & 0xff);
-                        bout.write(s & 0xff);
-                    }
-                }
-
-                stream.closeFrame();
-            }
-        } catch (BitstreamException e) {
-            log.error("Decoding error");
-            log.error(e);
-        } catch (DecoderException e) {
-            log.error("Decoding error");
-            log.error(e);
+        /**
+         * Optimize this later:
+         * Make AudioFormatWritable and read this once at first construction time.
+         */
+        AudioFormat baseFormat = in.getFormat();
+        if(outputFormat == null) { //Make it default
+            outputFormat = new AudioFormat(
+                AudioFormat.Encoding.PCM_SIGNED,    // Encoding to use
+                baseFormat.getSampleRate(),	        // sample rate (same as base format)
+                16,				                    // sample size in bits (thx to Javazoom)
+                baseFormat.getChannels(),	        // # of Channels
+                baseFormat.getChannels()*2,	        // Frame Size
+                baseFormat.getSampleRate(),	        // Frame Rate
+                true				                // Big Endian
+            );
         }
-        return bout;
+        decodedStream = AudioSystem.getAudioInputStream(outputFormat, in);
+
+        return decodedStream;
     }
+
 
     @Override
     public void write(DataOutput out) throws IOException {
@@ -205,7 +136,6 @@ public class MDFWritable implements Writable {
         framesize.write(out);
         vbr.write(out);
         fileData.write(out);
-        decoded.write(out);
     }
 
     @Override
@@ -218,7 +148,6 @@ public class MDFWritable implements Writable {
         framesize.readFields(in);
         vbr.readFields(in);
         fileData.readFields(in);
-        decoded.readFields(in);
     }
 
     public BytesWritable getFileData() {
@@ -255,7 +184,6 @@ public class MDFWritable implements Writable {
         this.bitrate = new IntWritable(bitrate);
     }
 
-
     public IntWritable getFramesize() {
         return framesize;
     }
@@ -268,16 +196,7 @@ public class MDFWritable implements Writable {
         return vbr.get();
     }
 
-
     public void setVbr(boolean vbr) {
         this.vbr = new BooleanWritable(vbr);
-    }
-
-    public boolean isDecoded() {
-        return decoded.get();
-    }
-
-    private void setDecoded(Boolean decoded) {
-        this.decoded = new BooleanWritable(decoded);
     }
 }

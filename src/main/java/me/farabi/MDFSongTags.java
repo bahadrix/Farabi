@@ -7,11 +7,18 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.apache.log4j.Logger;
+import org.tritonus.share.sampled.file.TAudioFileFormat;
 
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Farabi
@@ -21,6 +28,8 @@ import java.io.InputStream;
  */
 @SuppressWarnings("UnusedDeclaration")
 public class MDFSongTags implements Writable {
+    private final static Logger log = Util.getLogger(MDFSongTags.class);
+
     protected IntWritable ID = new IntWritable(0); // can't be null
     protected Text title = new Text("<unknown>");
     protected Text artist = new Text("<unknown>");
@@ -30,17 +39,14 @@ public class MDFSongTags implements Writable {
 
     public MDFSongTags() {}
 
+
+    @Deprecated // Diger construtor kullanilmali
     public MDFSongTags(InputStream in, long length, int ID) throws InvalidDataException, IOException, UnsupportedTagException {
-
         Mp3Stream mp3Stream = new Mp3Stream(in, length);
-
         ID3v1 tags = mp3Stream.getId3v2Tag() != null ?
                 mp3Stream.getId3v2Tag() :
                 mp3Stream.getId3v1Tag();
-
-
         setID(new IntWritable(ID));
-
         if(tags != null) {
             setAlbum(tags.getAlbum());
             setArtist(tags.getArtist());
@@ -48,7 +54,20 @@ public class MDFSongTags implements Writable {
             setTitle(tags.getTitle());
             setYear(tags.getYear());
         }
+    }
 
+    public MDFSongTags(AudioFileFormat fileFormat) {
+
+        if(fileFormat instanceof TAudioFileFormat) {
+                Map properties = fileFormat.properties();
+                setAlbum((String) properties.get("album"));
+                setArtist((String) properties.get("author"));
+                setGenreDesc((String) properties.get("mp3.id3tag.genre"));
+                setTitle((String) properties.get("title"));
+                setYear((String) properties.get("date"));
+        } else {
+            log.warn("Current AudioFileformat is not an instance of TAudioFileFormat. Tag read is skipped.");
+        }
 
     }
 
