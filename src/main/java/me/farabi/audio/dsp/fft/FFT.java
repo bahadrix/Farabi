@@ -39,8 +39,7 @@ public class FFT {
 
     public float[] transformAndGetMagnitudes(final float[] data) {
         forwardTransform(data);
-        float[] magnitudes = calculatePowers(data);
-        return magnitudes;
+        return calculatePowers(data);
     }
 
     public double binToHz(final int binIndex, final float sampleRate) {
