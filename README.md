@@ -7,7 +7,7 @@ Mass Signal Extraction & Analysis Architecture based On Distrubuted System
 ```bash
 git clone https://github.com/bahadrix/Farabi.git Farabi
 cd Farabi
-mvn clean package
+mvn package
 ```
 
 ### Creating Work Set Package From Existing MP3 Files
