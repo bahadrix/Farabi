@@ -3,11 +3,14 @@ package me.farabi.job;
 import me.farabi.MDFWritable;
 import me.farabi.Util;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.MapFile;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 
 import java.io.*;
 import java.net.URI;
@@ -27,20 +30,12 @@ import java.util.Map;
  * MP3 tagleri icin ayri bir map dosyasi olusturur ancak bu bilgiler asil map dosyasinda da vardir.
  *
  */
-public class CreatePack {
+public class CreatePack extends Configured implements Tool {
 
     private static org.apache.log4j.Logger log = Util.getLogger(CreatePack.class);
 
-    static enum ErrorType {ARGUMENT, NOWORKTODO}
-
-    private static long startTime;
-
-    private static String outputPath;
-    private static int maxFiles = 0;
-
-    @SuppressWarnings("UnusedDeclaration")
-    public static void main(String[] args) {
-
+    @Override
+    public int run(String[] args) throws Exception {
         String opts;
         File localDir;
 
@@ -91,6 +86,7 @@ public class CreatePack {
             log.info(String.valueOf(mp3files.length) + " file(s) found under " + localDir.getAbsolutePath());
         } else {
             errorOut(ErrorType.NOWORKTODO, "No mp3 files found under " + localDir.getAbsolutePath());
+
         }
 
         // Delete output path if exist. =================================================
@@ -100,12 +96,29 @@ public class CreatePack {
                 log.info("Output path '" + outputPath + "' deleted.");
         } catch (IOException e) {
             log.error("Can't clear existing output path " + outputPath);
+            return 4;
         }
 
         // Create package
         create(mp3files, localDir.getName());
 
-        System.exit(0);
+        return 0;
+    }
+
+    static enum ErrorType {ARGUMENT, NOWORKTODO}
+
+    private static long startTime;
+
+    private static String outputPath;
+    private static int maxFiles = 0;
+
+    @SuppressWarnings("UnusedDeclaration")
+    public static void main(String[] args) throws Exception {
+
+        Configuration conf = new Configuration();
+        int res = ToolRunner.run(conf, new CreatePack(), args);
+        System.exit(res);
+
     }
 
     private static void create(File[] mp3Files, String mapName) {
