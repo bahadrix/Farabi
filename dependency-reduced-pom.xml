@@ -23,24 +23,6 @@
             <goals>
               <goal>shade</goal>
             </goals>
-            <configuration>
-              <minimizeJar>true</minimizeJar>
-              <artifactSet>
-                <excludes>
-                  <exclude>org.apache.hadoop</exclude>
-                  <exclude>org.apache.mrunit</exclude>
-                  <exclude>log4j</exclude>
-                  <exclude>org.xerial.snappy</exclude>
-                  <exclude>org.mockito</exclude>
-                  <exclude>org.codehaus.jackson</exclude>
-                  <exclude>org.objenesis</exclude>
-                  <exclude>org.apache.avro</exclude>
-                  <exclude>com.google.protobuf</exclude>
-                  <exclude>com.google.common</exclude>
-                  <exclude>org.slf4j</exclude>
-                </excludes>
-              </artifactSet>
-            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -59,21 +41,9 @@
   </repositories>
   <dependencies>
     <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
-      <version>1.1.1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-io</artifactId>
       <version>1.3.2</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

@@ -1,3 +1,3 @@
 git pull
-maven clean
-mavepackage
+mvn clean
+mvn package
