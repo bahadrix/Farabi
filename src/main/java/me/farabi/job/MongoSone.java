@@ -131,7 +131,7 @@ public class MongoSone extends Configured implements Tool {
 
         log.info("MongoDB server: " + mongoHost + ":" + mongoPort);
 
-        System.exit(0);
+
         Job job = new Job(conf, "Map2Mongo");
 
         Path pIn = new Path(args[0]);
