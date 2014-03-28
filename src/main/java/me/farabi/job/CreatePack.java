@@ -158,6 +158,7 @@ public class CreatePack {
                 }
             }
         } catch (IOException e) {
+            log.error(e);
             e.printStackTrace();
         } finally {
             IOUtils.closeStream(writerAudio);

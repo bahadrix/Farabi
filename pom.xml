@@ -38,16 +38,18 @@
             <artifactId>jump3r</artifactId>
             <version>1.0.3-BAHA</version>
         </dependency>
-        <dependency><!-- Mp3 decoding tool -->
+
+        <dependency>
             <groupId>javazoom</groupId>
             <artifactId>jlayer</artifactId>
             <version>1.0.1</version>
         </dependency>
+
         <dependency><!-- Unit testing -->
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
-            <scope>test</scope>
+            <!-- mp3spi <scope>test</scope> -->
         </dependency>
         <dependency><!-- my fork of mpatric that enables reading tags from streams -->
             <groupId>com.mpatric</groupId>
@@ -110,7 +112,9 @@
                                     <!-- Some libs are already included in running machine's classpath,
                                     we excluded them -->
                                     <exclude>org.apache.hadoop</exclude>
+                                    <!-- yok artık ya mp3spi, komiksin
                                     <exclude>junit</exclude>
+                                    -->
                                     <exclude>org.apache.mrunit</exclude>
                                     <exclude>log4j</exclude>
                                     <exclude>org.xerial.snappy</exclude>
