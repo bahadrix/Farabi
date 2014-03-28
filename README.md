@@ -3,7 +3,7 @@ Farabi
 
 Mass Signal Extraction & Analysis Architecture based On Distrubuted System
 
-### Installing on IBM BigInsights Cluster
+### Install
 ```bash
 git clone https://github.com/bahadrix/Farabi.git Farabi
 cd Farabi
