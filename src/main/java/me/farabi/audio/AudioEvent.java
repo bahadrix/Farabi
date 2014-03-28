@@ -1,11 +1,18 @@
 package me.farabi.audio;
 
+import me.farabi.audio.dsp.utils.AudioFloatConverter;
+
+import javax.sound.sampled.AudioFormat;
+
 /**
  * Created by umutcanguney on 16/03/14.
- * WORK IN PROGRESS
  * This class will handle calculations for audio analysis of a given frame.
  */
 public class AudioEvent {
+
+    private final AudioFormat format;
+
+    private final AudioFloatConverter converter;
 
     /**
      * The audio data encoded in floats from -1.0 to 1.0.
@@ -27,6 +34,13 @@ public class AudioEvent {
      */
     private long frameLength;
 
+    public AudioEvent(AudioFormat format,long frameLength){
+        this.format = format;
+        this.converter = AudioFloatConverter.getConverter(format);
+        this.overlap = 0;
+        this.frameLength = frameLength;
+    }
+
     public long getFrameLength() {
         return frameLength;
     }
@@ -44,6 +58,11 @@ public class AudioEvent {
     }
 
     public byte[] getByteBuffer() {
+        int length = getFloatBuffer().length * format.getFrameSize();
+        if(byteBuffer == null || byteBuffer.length != length){
+            byteBuffer = new byte[length];
+        }
+        converter.toByteArray(getFloatBuffer(), byteBuffer);
         return byteBuffer;
     }
 
