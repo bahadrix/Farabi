@@ -104,30 +104,6 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
-                        <configuration>
-                            <!-- Exclude with dependencies -->
-                            <minimizeJar>true</minimizeJar>
-                            <artifactSet>
-                                <excludes>
-                                    <!-- Some libs are already included in running machine's classpath,
-                                    we excluded them -->
-                                    <exclude>org.apache.hadoop</exclude>
-                                    <!-- yok artık ya mp3spi, komiksin
-                                    <exclude>junit</exclude>
-                                    -->
-                                    <exclude>org.apache.mrunit</exclude>
-                                    <exclude>log4j</exclude>
-                                    <exclude>org.xerial.snappy</exclude>
-                                    <exclude>org.mockito</exclude>
-                                    <exclude>org.codehaus.jackson</exclude>
-                                    <exclude>org.objenesis</exclude>
-                                    <exclude>org.apache.avro</exclude>
-                                    <exclude>com.google.protobuf</exclude>
-                                    <exclude>com.google.common</exclude>
-                                    <exclude>org.slf4j</exclude>
-                                </excludes>
-                            </artifactSet>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
