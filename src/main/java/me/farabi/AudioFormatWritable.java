@@ -21,6 +21,8 @@ public class AudioFormatWritable implements Writable {
     public BooleanWritable bigEndian = new BooleanWritable();
     public MapWritable properties;
 
+    public Text stringRep = new Text();
+
     public AudioFormatWritable(AudioFormat format) {
         setEncoding(format.getEncoding().toString());
         setSampleRate(format.getSampleRate());
@@ -30,6 +32,7 @@ public class AudioFormatWritable implements Writable {
         setFrameRate(format.getFrameRate());
         setBigEndian(format.isBigEndian());
         setProperties(format.properties());
+        setStringRep(format.toString());
     }
 
     @Override
@@ -54,6 +57,14 @@ public class AudioFormatWritable implements Writable {
         frameRate.readFields(in);
         bigEndian.readFields(in);
         properties.readFields(in);
+    }
+
+    public void setStringRep(String s) {
+        this.stringRep = new Text(s);
+    }
+
+    public Text getStringRep() {
+        return this.stringRep;
     }
 
     public Text getEncoding() {
