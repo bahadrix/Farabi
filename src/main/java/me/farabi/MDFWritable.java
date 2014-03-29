@@ -1,14 +1,14 @@
 package me.farabi;
 
-import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.*;
-import java.io.*;
-import java.util.Map;
+import java.io.ByteArrayInputStream;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * Farabi
@@ -24,12 +24,6 @@ public class MDFWritable implements Writable {
     private static org.apache.log4j.Logger log = Logger.getLogger(MDFWritable.class);
     public MDFSongTags tags;
 
-
-    protected IntWritable outputFrequency = new IntWritable(0);
-    protected IntWritable outputChannels = new IntWritable(0);
-    protected IntWritable bitrate = new IntWritable(0);
-    protected IntWritable framesize = new IntWritable(0);
-    protected BooleanWritable vbr = new BooleanWritable(false);
     protected BytesWritable fileData = new BytesWritable(new byte[]{0});
 
     protected AudioFormatWritable audioFormatWritable;
@@ -56,21 +50,8 @@ public class MDFWritable implements Writable {
         AudioInputStream in = AudioSystem.getAudioInputStream(binStream);
         AudioFormat baseFormat = in.getFormat();
 
+        //Set format info
         setAudioFormatWritable(new AudioFormatWritable(baseFormat));
-
-
-        /**
-         * We set some properties at this constrution time.
-         * For a full list see 'no-tag' in test/resources/tag-states.txt
-         */
-
-        Map props = fileFormat.properties();
-
-        setOutputChannels(baseFormat.getChannels());
-        setOutputFrequency((Integer)props.get("mp3.frequency.hz"));
-        setBitrate((Integer) props.get("mp3.bitrate.nominal.bps"));
-        setFramesize((Integer)props.get("mp3.framesize.bytes"));
-        setVbr((Boolean)props.get("mp3.vbr"));
 
         //Set encoded data
         setFileData(new BytesWritable(byteArray));
@@ -127,24 +108,14 @@ public class MDFWritable implements Writable {
     public void write(DataOutput out) throws IOException {
         tags.write(out);
         fileData.write(out);
-        outputFrequency.write(out);
-        outputChannels.write(out);
-        bitrate.write(out);
-        framesize.write(out);
-        vbr.write(out);
-        fileData.write(out);
+        audioFormatWritable.write(out);
     }
 
     @Override
     public void readFields(DataInput in) throws IOException {
         tags.readFields(in);
         fileData.readFields(in);
-        outputFrequency.readFields(in);
-        outputChannels.readFields(in);
-        bitrate.readFields(in);
-        framesize.readFields(in);
-        vbr.readFields(in);
-        fileData.readFields(in);
+        audioFormatWritable.readFields(in);
     }
 
     public AudioFormatWritable getAudioFormatWritable() {
@@ -163,45 +134,4 @@ public class MDFWritable implements Writable {
         this.fileData = fileData;
     }
 
-    public IntWritable getOutputFrequency() {
-        return outputFrequency;
-    }
-
-
-    public void setOutputFrequency(int outputFrequency) {
-        this.outputFrequency = new IntWritable(outputFrequency);
-    }
-
-    public IntWritable getOutputChannels() {
-        return outputChannels;
-    }
-
-
-    public void setOutputChannels(int outputChannels) {
-        this.outputChannels = new IntWritable(outputChannels);
-    }
-
-    public IntWritable getBitrate() {
-        return bitrate;
-    }
-
-    public void setBitrate(int bitrate) {
-        this.bitrate = new IntWritable(bitrate);
-    }
-
-    public IntWritable getFramesize() {
-        return framesize;
-    }
-
-    public void setFramesize(int framesize) {
-        this.framesize = new IntWritable(framesize);
-    }
-
-    public boolean isVbr() {
-        return vbr.get();
-    }
-
-    public void setVbr(boolean vbr) {
-        this.vbr = new BooleanWritable(vbr);
-    }
 }
