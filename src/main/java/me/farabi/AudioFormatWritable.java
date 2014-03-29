@@ -9,19 +9,29 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Map;
 
+@SuppressWarnings("UnusedDeclaration")
 public class AudioFormatWritable implements Writable {
     private static org.apache.log4j.Logger log = Logger.getLogger(AudioFormatWritable.class);
 
     public Text encoding = new Text("");
-    public FloatWritable sampleRate = new FloatWritable(0);
-    public IntWritable sampleSizeInBits = new IntWritable(0);
-    public IntWritable channels = new IntWritable(0);
-    public IntWritable frameSize = new IntWritable(0);
-    public FloatWritable frameRate = new FloatWritable();
-    public BooleanWritable bigEndian = new BooleanWritable();
+    public FloatWritable sampleRate;
+    public IntWritable sampleSizeInBits;
+    public IntWritable channels;
+    public IntWritable frameSize;
+    public FloatWritable frameRate;
+    public BooleanWritable bigEndian;
     public MapWritable properties;
 
     public Text stringRep = new Text("");
+
+    public AudioFormatWritable() {
+        sampleRate = new FloatWritable(0);
+        sampleSizeInBits = new IntWritable(0);
+        channels = new IntWritable(0);
+        frameSize = new IntWritable(0);
+        frameRate = new FloatWritable();
+        bigEndian = new BooleanWritable();
+    }
 
     public AudioFormatWritable(AudioFormat format) {
         setEncoding(format.getEncoding().toString());

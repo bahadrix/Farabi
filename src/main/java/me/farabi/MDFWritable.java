@@ -22,15 +22,14 @@ import java.io.IOException;
 public class MDFWritable implements Writable {
 
     private static org.apache.log4j.Logger log = Logger.getLogger(MDFWritable.class);
+
     public MDFSongTags tags;
-
-    protected BytesWritable fileData = new BytesWritable(new byte[]{0});
-
+    protected BytesWritable fileData;
     protected AudioFormatWritable audioFormatWritable;
 
     public MDFWritable() {
-        //FIXME AudoFormatWritable'a empty constructor eklendikten sonra asagidaki uncomment edilmeli
-        //audioFormatWritable = new AudioFormatWritable();
+        fileData = new BytesWritable(new byte[]{0});
+        audioFormatWritable = new AudioFormatWritable();
         tags = new MDFSongTags();
     }
 
@@ -77,7 +76,7 @@ public class MDFWritable implements Writable {
      * @throws UnsupportedAudioFileException
      */
     public AudioInputStream getDecodeStream(AudioFormat outputFormat) throws IOException, UnsupportedAudioFileException {
-        AudioInputStream decodedStream = null;
+        AudioInputStream decodedStream;
 
         ByteArrayInputStream bis = new ByteArrayInputStream(getFileData().getBytes());
         AudioInputStream in = AudioSystem.getAudioInputStream(bis);
