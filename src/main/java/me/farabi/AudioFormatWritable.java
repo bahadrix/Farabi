@@ -13,7 +13,7 @@ import java.util.Map;
 public class AudioFormatWritable implements Writable {
     private static org.apache.log4j.Logger log = Logger.getLogger(AudioFormatWritable.class);
 
-    public Text encoding = new Text("");
+    public Text encoding;
     public FloatWritable sampleRate;
     public IntWritable sampleSizeInBits;
     public IntWritable channels;
@@ -22,15 +22,17 @@ public class AudioFormatWritable implements Writable {
     public BooleanWritable bigEndian;
     public MapWritable properties;
 
-    public Text stringRep = new Text("");
+    public Text stringRep;
 
     public AudioFormatWritable() {
+        encoding = new Text("");
         sampleRate = new FloatWritable(0);
         sampleSizeInBits = new IntWritable(0);
         channels = new IntWritable(0);
         frameSize = new IntWritable(0);
         frameRate = new FloatWritable();
         bigEndian = new BooleanWritable();
+        stringRep = new Text("");
     }
 
     public AudioFormatWritable(AudioFormat format) {
