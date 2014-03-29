@@ -32,8 +32,11 @@ public class MDFWritable implements Writable {
     protected BooleanWritable vbr = new BooleanWritable(false);
     protected BytesWritable fileData = new BytesWritable(new byte[]{0});
 
+    protected AudioFormatWritable audioFormatWritable;
 
     public MDFWritable() {
+        //FIXME AudoFormatWritable'a empty constructor eklendikten sonra asagidaki uncomment edilmeli
+        //audioFormatWritable = new AudioFormatWritable();
         tags = new MDFSongTags();
     }
 
@@ -52,6 +55,9 @@ public class MDFWritable implements Writable {
 
         AudioInputStream in = AudioSystem.getAudioInputStream(binStream);
         AudioFormat baseFormat = in.getFormat();
+
+        setAudioFormatWritable(new AudioFormatWritable(baseFormat));
+
 
         /**
          * We set some properties at this constrution time.
@@ -139,6 +145,14 @@ public class MDFWritable implements Writable {
         framesize.readFields(in);
         vbr.readFields(in);
         fileData.readFields(in);
+    }
+
+    public AudioFormatWritable getAudioFormatWritable() {
+        return audioFormatWritable;
+    }
+
+    public void setAudioFormatWritable(AudioFormatWritable audioFormatWritable) {
+        this.audioFormatWritable = audioFormatWritable;
     }
 
     public BytesWritable getFileData() {
