@@ -4,6 +4,7 @@ import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Index;
 import com.google.code.morphia.annotations.Indexes;
+import me.farabi.AudioFormatWritable;
 import me.farabi.MDFWritable;
 
 /**
@@ -44,11 +45,17 @@ public class SongOne {
 
     public static SongOne createFromMDF(MDFWritable mdf) {
         SongOne sone = new SongOne();
-        sone.setBitrate(mdf.getBitrate().get());
-        sone.setFramesize(mdf.getFramesize().get());
-        sone.setOutputChannels(mdf.getOutputChannels().get());
-        sone.setOutputFrequency(mdf.getOutputFrequency().get());
-        sone.setVbr(mdf.isVbr());
+        AudioFormatWritable afw = mdf.getAudioFormatWritable();
+        sone.setBitrate(Integer.getInteger(afw.getProperties().get("bitrate").toString()));
+//        sone.setBitrate(mdf.getBitrate().get());
+        sone.setFramesize(afw.getFrameSize().get());
+//        sone.setFramesize(mdf.getFramesize().get());
+        sone.setOutputChannels(afw.getChannels().get());
+//        sone.setOutputChannels(mdf.getOutputChannels().get());
+        sone.setOutputFrequency(((int)afw.getSampleRate().get()));
+//        sone.setOutputFrequency(mdf.getOutputFrequency().get());
+        sone.setVbr(Boolean.getBoolean(afw.getProperties().get("vbr").toString()));
+//        sone.setVbr(mdf.isVbr());
 
         Tags tags = new Tags();
         tags.album = mdf.tags.getAlbum().toString();
