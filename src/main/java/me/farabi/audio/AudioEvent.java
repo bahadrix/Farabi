@@ -78,4 +78,8 @@ public class AudioEvent {
         this.floatBuffer = floatBuffer;
     }
 
+    public AudioFloatConverter getConverter() {
+        return this.converter;
+    }
+
 }
