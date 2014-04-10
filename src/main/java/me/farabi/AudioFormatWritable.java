@@ -33,9 +33,11 @@ public class AudioFormatWritable implements Writable {
         frameRate = new FloatWritable();
         bigEndian = new BooleanWritable();
         stringRep = new Text("");
+        properties = new MapWritable();
     }
 
     public AudioFormatWritable(AudioFormat format) {
+        properties = new MapWritable();
         setEncoding(format.getEncoding().toString());
         setSampleRate(format.getSampleRate());
         setSampleSizeInBits(format.getSampleSizeInBits());

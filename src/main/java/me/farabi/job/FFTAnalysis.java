@@ -7,6 +7,8 @@ import me.farabi.AudioFormatWritable;
 import me.farabi.MDFWritable;
 import me.farabi.Util;
 import me.farabi.audio.AudioEvent;
+import me.farabi.audio.dsp.fft.FFT;
+import me.farabi.audio.dsp.fft.HammingWindow;
 import me.farabi.model.SongOne;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.IntWritable;
@@ -32,10 +34,15 @@ public class FFTAnalysis extends Configured implements Tool {
         public AudioFormatWritable afw;
         public AudioFormat format;
         public AudioEvent event;
+        public int sampleSize;
+        public FFT fft;
 
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
             super.setup(context);
+            sampleSize = 2048; //ideal sample size.
+            fft = new FFT(sampleSize, new HammingWindow());
+
             String host = context.getConfiguration().get("mongodb.server.host");
             int port = Integer.parseInt(context.getConfiguration().get("mongodb.server.port"));
             String dbname = context.getConfiguration().get("mongodb.db");
@@ -53,10 +60,13 @@ public class FFTAnalysis extends Configured implements Tool {
 
             try {
 
-                afw = mdf.getAudioFormatWritable();
-
-                format = new AudioFormat(new AudioFormat.Encoding(afw.getEncoding().toString()), afw.getSampleRate().get(), afw.getSampleSizeInBits().get(), afw.getChannels().get(), afw.getFrameSize().get(), afw.getFrameRate().get(), afw.isBigEndian());
-
+                /*
+                AudioFormatWritable inputFormat'ın bilgisini tutuyor.
+                Bize decoded stream'in bilgisi lazım olduğu için bunu kullanmıyoruz.
+                 */
+//                afw = mdf.getAudioFormatWritable();
+//
+//                format = new AudioFormat(new AudioFormat.Encoding(afw.getEncoding().toString()), afw.getSampleRate().get(), afw.getSampleSizeInBits().get(), afw.getChannels().get(), afw.getFrameSize().get(), afw.getFrameRate().get(), afw.isBigEndian());
 
 
                 /**
@@ -65,18 +75,20 @@ public class FFTAnalysis extends Configured implements Tool {
                  * @see me.farabi.MDFWritable
                  */
                 AudioInputStream decodedStream = mdf.getDecodeStream();
+                format = decodedStream.getFormat();
 
                 event = new AudioEvent(format, decodedStream.getFrameLength());
 
-                byte[] byteBuffer = new byte[2048];
+                byte[] byteBuffer = new byte[sampleSize*format.getSampleSizeInBits()];
+                float[] floatBuffer = new float[sampleSize];
+                float[] magnitudes;
 
                 while ((decodedStream.read(byteBuffer,0,byteBuffer.length)) != -1) {
-                    event.setFloatBuffer(event.getConverter().toFloatArray(byteBuffer, new float[2048]));
+                    event.setFloatBuffer(event.getConverter().toFloatArray(byteBuffer, floatBuffer));
+                    magnitudes = fft.transformAndGetMagnitudes(event.getFloatBuffer());
                 }
 
-                // burada deceodeStream üzerinden yardiririyoruz.
-
-                ds.save(SongOne.createFromMDF(mdf));
+//                ds.save(SongOne.createFromMDF(mdf));
 
             } catch (UnsupportedAudioFileException e) {
                 log.error("Error on getting decoded stream");
