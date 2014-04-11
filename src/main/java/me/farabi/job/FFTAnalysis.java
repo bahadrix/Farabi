@@ -43,7 +43,7 @@ public class FFTAnalysis extends Configured implements Tool {
         protected void setup(Context context) throws IOException, InterruptedException {
             super.setup(context);
             sampleSize = 2048; //ideal sample size.
-            fft = new FFT(sampleSize, new HammingWindow());
+            fft = new FFT(sampleSize);
 
             String host = context.getConfiguration().get("mongodb.server.host");
             int port = Integer.parseInt(context.getConfiguration().get("mongodb.server.port"));
