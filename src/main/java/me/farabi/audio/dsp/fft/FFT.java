@@ -42,6 +42,11 @@ public class FFT {
         return calculatePowers(data);
     }
 
+    public double[] transformAndGetDecibels(final float[] data) {
+        forwardTransform(data);
+        return calculateDecibels(data);
+    }
+
     public double binToHz(final int binIndex, final float sampleRate) {
         return binIndex * sampleRate / (double) this.fftSize;
     }
@@ -60,6 +65,23 @@ public class FFT {
         int l = magnitudes.length;
         for (int i = 0; i < l; i++) {
             magnitudes[i] = calculatePower(data[2*i], data[2*i + 1], i);
+        }
+    }
+
+    public double calculateDecibel(float real, float im) {
+        return (double) 20*Math.log10(Math.sqrt(real*real + im*im) / this.fftSize);
+    }
+
+    public double[] calculateDecibels(final float[] data) {
+        double[] magnitudes = new double[data.length / 2];
+        calculateDecibels(data, magnitudes);
+        return magnitudes;
+    }
+
+    public void calculateDecibels(final float[] data, final double[] magnitudes) {
+        int l = magnitudes.length;
+        for (int i = 0; i < l; i++) {
+            magnitudes[i] = calculateDecibel(data[2*i], data[2*i + 1]);
         }
     }
 

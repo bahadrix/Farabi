@@ -9,6 +9,7 @@ import me.farabi.Util;
 import me.farabi.audio.AudioEvent;
 import me.farabi.audio.dsp.fft.FFT;
 import me.farabi.audio.dsp.fft.HammingWindow;
+import me.farabi.model.PeakHolder;
 import me.farabi.model.SongOne;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.IntWritable;
@@ -21,6 +22,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by umutcanguney on 03/04/14.
@@ -56,8 +58,6 @@ public class FFTAnalysis extends Configured implements Tool {
         @Override
         protected void map(IntWritable key, MDFWritable mdf, Context context) throws IOException, InterruptedException {
 
-            SongOne so = SongOne.createFromMDF(mdf);
-
             try {
 
                 /*
@@ -81,11 +81,39 @@ public class FFTAnalysis extends Configured implements Tool {
 
                 byte[] byteBuffer = new byte[sampleSize*format.getSampleSizeInBits()];
                 float[] floatBuffer = new float[sampleSize];
-                float[] magnitudes;
+                double[] decibels;
+                PeakHolder peaks = new PeakHolder();
+                short Hz;
+                double peak1 = Double.NEGATIVE_INFINITY, peak2=Double.NEGATIVE_INFINITY, peak3=Double.NEGATIVE_INFINITY;
+                ArrayList<PeakHolder> list = new ArrayList<PeakHolder>();
 
                 while ((decodedStream.read(byteBuffer,0,byteBuffer.length)) != -1) {
                     event.setFloatBuffer(event.getConverter().toFloatArray(byteBuffer, floatBuffer));
-                    magnitudes = fft.transformAndGetMagnitudes(event.getFloatBuffer());
+                    decibels = fft.calculateDecibels(event.getFloatBuffer());
+                    for (int i = 0; i < decibels.length; i++) {
+                        Hz = (short)fft.binToHz(i,format.getSampleRate());
+                        if (Hz < 1000) {
+                            if (peak1 < decibels[i]) {
+                                peak1 = decibels[i];
+                                peaks.freq1 = Hz;
+                            }
+                        } else if (Hz < 8000) {
+                            if (peak2 < decibels[i]) {
+                                peak2 = decibels[i];
+                                peaks.freq2 = Hz;
+                            }
+                        } else if (Hz < 16000) {
+                            if (peak3 < decibels[i]) {
+                                peak3 = decibels[i];
+                                peaks.freq3 = Hz;
+                            }
+                        }
+                    }
+                    list.add(peaks);
+                    peaks = new PeakHolder();
+                    peak1 = Double.NEGATIVE_INFINITY;
+                    peak2=Double.NEGATIVE_INFINITY;
+                    peak3=Double.NEGATIVE_INFINITY;
                 }
 
 //                ds.save(SongOne.createFromMDF(mdf));
