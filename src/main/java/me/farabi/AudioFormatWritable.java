@@ -146,7 +146,7 @@ public class AudioFormatWritable implements Writable {
     public void setProperties(Map<String, Object> map) {
         for (String s : map.keySet()) {
             if (!this.properties.containsKey(new Text(s))) {
-                this.properties.put(new Text(s), new ObjectWritable(map.get(s)));
+                this.properties.put(new Text(s), new Text(map.get(s).toString()));
             }
         }
     }
