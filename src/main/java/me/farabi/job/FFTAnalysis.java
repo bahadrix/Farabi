@@ -37,7 +37,8 @@ import java.util.Properties;
 
 
 public class FFTAnalysis extends Configured implements Tool {
-    private static org.apache.log4j.Logger log = Util.getLogger(MongoSone.class);
+    private static org.apache.log4j.Logger log = Util.getLogger(FFTAnalysis.class);
+    public static final int SAMPLESIZE = 2048; // ideal sample size
 
     public static class Mappa extends Mapper<IntWritable, MDFWritable, Text, NullWritable> {
 
@@ -45,14 +46,14 @@ public class FFTAnalysis extends Configured implements Tool {
         public AudioFormatWritable afw;
         public AudioFormat format;
         public AudioEvent event;
-        public int sampleSize;
+
         public FFT fft;
 
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
             super.setup(context);
-            sampleSize = 2048; //ideal sample size.
-            fft = new FFT(sampleSize);
+
+            fft = new FFT(SAMPLESIZE);
 
             String host = context.getConfiguration().get("mongodb.server.host");
             int port = Integer.parseInt(context.getConfiguration().get("mongodb.server.port"));
@@ -70,7 +71,7 @@ public class FFTAnalysis extends Configured implements Tool {
             try {
 
                 // Get peaks
-                Peaks peaks = FFTAnalysis.getPeaks(mdf,format,event,sampleSize,fft);
+                Peaks peaks = FFTAnalysis.getPeaks(mdf,format,event, SAMPLESIZE,fft);
                 /**
                  * Peaks nesnesini songOne nesnesinin içine gömüp
                  * mongoya songOne'i kaydedeceğiz. Daha sonra songOne
