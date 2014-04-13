@@ -47,8 +47,8 @@ public class FFTAnalysisSerial extends Configured implements Tool {
 
     static String usage = "\nUsage: \n" +
             "FFAnalysisSerial <input> <output> [-p <properties file>]\n" +
-            "   <input>                 : Package data file location on HDFS\n" +
-            "   <output>                : Output location on HDFS for logs and stuff\n" +
+            "   <input>                 : Source folder\n" +
+            "   -m <number>             : Set maximum number of files to be proccessed\n"+
             "   -p <properties file>    : Properties file for mongodb connection info and stuff.\n" +
             "                             Default: farabi.properties\n";
 
@@ -67,12 +67,24 @@ public class FFTAnalysisSerial extends Configured implements Tool {
             log.info(usage);
         }
 
+        int max = 0;
+        if(arguments.get("-m") != null) {
+            if(arguments.get("-m").size() == 1) {
+                max = Integer.parseInt(arguments.get("-m").get(0));
+            } else {
+                log.error("argument -m error");
+                return -1;
+            }
+        }
+
         Properties props = Util.getFarabiProps(arguments);
 
         if(props == null) {
             log.error("Properties file not found");
             return 2;
         }
+
+
 
         String mongoHost = String.valueOf(props.get("mongodb.server.host"));
         String mongoPort = String.valueOf(props.get("mongodb.server.port"));
@@ -109,9 +121,14 @@ public class FFTAnalysisSerial extends Configured implements Tool {
             log.error(e);
             return 5;
         }
-
-        for(File file : mp3files)
+        int i = 0;
+        for(File file : mp3files) { i++;
             process(file);
+            if(max>0 && max == i) {
+                log.info("Max file limit reached");
+                break;
+            }
+        }
 
         return 0;
     }
