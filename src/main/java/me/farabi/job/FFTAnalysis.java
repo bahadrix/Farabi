@@ -69,66 +69,8 @@ public class FFTAnalysis extends Configured implements Tool {
 
             try {
 
-                /*
-                AudioFormatWritable inputFormat'ın bilgisini tutuyor.
-                Bize decoded stream'in bilgisi lazım olduğu için bunu kullanmıyoruz.
-                 */
-//                afw = mdf.getAudioFormatWritable();
-//
-//                format = new AudioFormat(new AudioFormat.Encoding(afw.getEncoding().toString()), afw.getSampleRate().get(), afw.getSampleSizeInBits().get(), afw.getChannels().get(), afw.getFrameSize().get(), afw.getFrameRate().get(), afw.isBigEndian());
-
-
-                /**
-                 * getDecodeStream parameteresi olarak AudioFormat verilebilir.
-                 * Aşağıdaki gibi verilmezse default format yapar.
-                 * @see me.farabi.MDFWritable
-                 */
-                AudioInputStream decodedStream = mdf.getDecodeStream();
-                format = decodedStream.getFormat();
-
-                event = new AudioEvent(format, decodedStream.getFrameLength());
-
-                byte[] byteBuffer = new byte[sampleSize*format.getSampleSizeInBits()];
-                float[] floatBuffer = new float[sampleSize];
-                double[] decibels;
-                PeakHolder peakHolder = new PeakHolder();
-                short Hz;
-                double peak1 = Double.NEGATIVE_INFINITY, peak2=Double.NEGATIVE_INFINITY, peak3=Double.NEGATIVE_INFINITY;
-                ArrayList<PeakHolder> list = new ArrayList<PeakHolder>();
-
-                while ((decodedStream.read(byteBuffer,0,byteBuffer.length)) != -1) {
-                    event.setFloatBuffer(event.getConverter().toFloatArray(byteBuffer, floatBuffer));
-                    decibels = fft.calculateDecibels(event.getFloatBuffer());
-                    for (int i = 0; i < decibels.length; i++) {
-                        Hz = (short)fft.binToHz(i,format.getSampleRate());
-                        if (Hz < 1000) {
-                            if (peak1 < decibels[i]) {
-                                peak1 = decibels[i];
-                                peakHolder.freq1 = Hz;
-                            }
-                        } else if (Hz < 8000) {
-                            if (peak2 < decibels[i]) {
-                                peak2 = decibels[i];
-                                peakHolder.freq2 = Hz;
-                            }
-                        } else if (Hz < 16000) {
-                            if (peak3 < decibels[i]) {
-                                peak3 = decibels[i];
-                                peakHolder.freq3 = Hz;
-                            }
-                        }
-                    }
-                    list.add(peakHolder);
-                    peakHolder = new PeakHolder();
-                    peak1 = Double.NEGATIVE_INFINITY;
-                    peak2=Double.NEGATIVE_INFINITY;
-                    peak3=Double.NEGATIVE_INFINITY;
-                }
-
-
-                Peaks peaks = new Peaks();
-                peaks.setList(list);
-
+                // Get peaks
+                Peaks peaks = FFTAnalysis.getPeaks(mdf,format,event,sampleSize,fft);
                 /**
                  * Peaks nesnesini songOne nesnesinin içine gömüp
                  * mongoya songOne'i kaydedeceğiz. Daha sonra songOne
@@ -149,6 +91,71 @@ public class FFTAnalysis extends Configured implements Tool {
         }
 
 
+    }
+
+
+    static Peaks getPeaks(MDFWritable mdf, AudioFormat format, AudioEvent event, int sampleSize, FFT fft) throws IOException, UnsupportedAudioFileException {
+
+                /*
+                AudioFormatWritable inputFormat'ın bilgisini tutuyor.
+                Bize decoded stream'in bilgisi lazım olduğu için bunu kullanmıyoruz.
+                 */
+//                afw = mdf.getAudioFormatWritable();
+//
+//                format = new AudioFormat(new AudioFormat.Encoding(afw.getEncoding().toString()), afw.getSampleRate().get(), afw.getSampleSizeInBits().get(), afw.getChannels().get(), afw.getFrameSize().get(), afw.getFrameRate().get(), afw.isBigEndian());
+
+
+        /**
+         * getDecodeStream parameteresi olarak AudioFormat verilebilir.
+         * Aşağıdaki gibi verilmezse default format yapar.
+         * @see me.farabi.MDFWritable
+         */
+        AudioInputStream decodedStream = mdf.getDecodeStream();
+        format = decodedStream.getFormat();
+
+        event = new AudioEvent(format, decodedStream.getFrameLength());
+
+        byte[] byteBuffer = new byte[sampleSize*format.getSampleSizeInBits()];
+        float[] floatBuffer = new float[sampleSize];
+        double[] decibels;
+        PeakHolder peakHolder = new PeakHolder();
+        short Hz;
+        double peak1 = Double.NEGATIVE_INFINITY, peak2=Double.NEGATIVE_INFINITY, peak3=Double.NEGATIVE_INFINITY;
+        ArrayList<PeakHolder> list = new ArrayList<PeakHolder>();
+
+        while ((decodedStream.read(byteBuffer,0,byteBuffer.length)) != -1) {
+            event.setFloatBuffer(event.getConverter().toFloatArray(byteBuffer, floatBuffer));
+            decibels = fft.calculateDecibels(event.getFloatBuffer());
+            for (int i = 0; i < decibels.length; i++) {
+                Hz = (short)fft.binToHz(i,format.getSampleRate());
+                if (Hz < 1000) {
+                    if (peak1 < decibels[i]) {
+                        peak1 = decibels[i];
+                        peakHolder.freq1 = Hz;
+                    }
+                } else if (Hz < 8000) {
+                    if (peak2 < decibels[i]) {
+                        peak2 = decibels[i];
+                        peakHolder.freq2 = Hz;
+                    }
+                } else if (Hz < 16000) {
+                    if (peak3 < decibels[i]) {
+                        peak3 = decibels[i];
+                        peakHolder.freq3 = Hz;
+                    }
+                }
+            }
+            list.add(peakHolder);
+            peakHolder = new PeakHolder();
+            peak1 = Double.NEGATIVE_INFINITY;
+            peak2=Double.NEGATIVE_INFINITY;
+            peak3=Double.NEGATIVE_INFINITY;
+        }
+
+
+        Peaks peaks = new Peaks();
+        peaks.setList(list);
+        return peaks;
     }
 
     static String usage = "\nUsage: \n" +
