@@ -18,7 +18,7 @@ import me.farabi.MDFWritable;
 @SuppressWarnings("UnusedDeclaration")
 @Entity("SongOne")
 @Indexes({ @Index("tags") })
-public class SongOne {
+public class SongOne<T> {
     @Entity("SOTags")
     @Indexes({ @Index("title,artist") })
     static class Tags {
@@ -42,6 +42,11 @@ public class SongOne {
     private int bitrate;
     private int framesize;
     private boolean vbr;
+
+    /**
+     * Contains user defined custom data
+     */
+    private T data = null;
 
     public static SongOne createFromMDF(MDFWritable mdf) {
         SongOne sone = new SongOne();
@@ -77,6 +82,14 @@ public class SongOne {
         this.tags = tags;
         this.id = String.format("%s/%s/%s/%s",
                 tags.artist, tags.album, tags.title, tags.ID);
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
     }
 
     public int getOutputFrequency() {

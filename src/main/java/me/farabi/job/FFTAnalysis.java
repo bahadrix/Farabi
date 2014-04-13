@@ -10,6 +10,7 @@ import me.farabi.audio.AudioEvent;
 import me.farabi.audio.dsp.fft.FFT;
 import me.farabi.model.PeakHolder;
 import me.farabi.model.Peaks;
+import me.farabi.model.SongOne;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
@@ -124,10 +125,19 @@ public class FFTAnalysis extends Configured implements Tool {
                     peak3=Double.NEGATIVE_INFINITY;
                 }
 
+
                 Peaks peaks = new Peaks();
-                //TODO: get id from mdf
                 peaks.setList(list);
-                ds.save(peaks);
+
+                /**
+                 * Peaks nesnesini songOne nesnesinin içine gömüp
+                 * mongoya songOne'i kaydedeceğiz. Bunun için SongOne
+                 * sinifina data adinda bir jenerik özellik ekledim.
+                 */
+                SongOne<Peaks> song = SongOne.createFromMDF(mdf);
+                song.setData(peaks);
+
+                ds.save(song);
 
             } catch (UnsupportedAudioFileException e) {
                 log.error("Error on getting decoded stream");

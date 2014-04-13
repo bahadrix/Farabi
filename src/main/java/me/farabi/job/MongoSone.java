@@ -78,6 +78,7 @@ public class MongoSone extends Configured implements Tool {
                  */
                 AudioInputStream decodedStream = mdf.getDecodeStream();
 
+
                 // burada deceodeStream üzerinden yardiririyoruz.
 
                 ds.save(SongOne.createFromMDF(mdf));
