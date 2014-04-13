@@ -131,11 +131,12 @@ public class FFTAnalysis extends Configured implements Tool {
 
                 /**
                  * Peaks nesnesini songOne nesnesinin içine gömüp
-                 * mongoya songOne'i kaydedeceğiz. Bunun için SongOne
-                 * sinifina data adinda bir jenerik özellik ekledim.
+                 * mongoya songOne'i kaydedeceğiz. Daha sonra songOne
+                 * icine Peaks'i de kapsayan daha genis bir features
+                 * ozelligi dusunulebilir.
                  */
-                SongOne<Peaks> song = SongOne.createFromMDF(mdf);
-                song.setData(peaks);
+                SongOne song = SongOne.createFromMDF(mdf);
+                song.setPeaks(peaks);
 
                 ds.save(song);
 

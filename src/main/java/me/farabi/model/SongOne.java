@@ -19,7 +19,7 @@ import org.apache.hadoop.io.Text;
 @SuppressWarnings("UnusedDeclaration")
 @Entity("SongOne")
 @Indexes({ @Index("tags") })
-public class SongOne<T> {
+public class SongOne {
     @Entity("SOTags")
     @Indexes({ @Index("title,artist") })
     static class Tags {
@@ -47,7 +47,7 @@ public class SongOne<T> {
     /**
      * Contains user defined custom data
      */
-    private T data = null;
+    private Peaks peaks = null;
 
     public static SongOne createFromMDF(MDFWritable mdf) {
         SongOne sone = new SongOne();
@@ -87,12 +87,12 @@ public class SongOne<T> {
                 tags.artist, tags.album, tags.title, tags.ID);
     }
 
-    public T getData() {
-        return data;
+    public Peaks getPeaks() {
+        return peaks;
     }
 
-    public void setData(T data) {
-        this.data = data;
+    public void setPeaks(Peaks peaks) {
+        this.peaks = peaks;
     }
 
     public int getOutputFrequency() {
