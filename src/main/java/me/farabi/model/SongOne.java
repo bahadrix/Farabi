@@ -51,7 +51,8 @@ public class SongOne<T> {
     public static SongOne createFromMDF(MDFWritable mdf) {
         SongOne sone = new SongOne();
         AudioFormatWritable afw = mdf.getAudioFormatWritable();
-        sone.setBitrate(Integer.getInteger(afw.getProperties().get("bitrate").toString()));
+
+        sone.setBitrate(Integer.parseInt(afw.getProperties().get("bitrate").toString()));
 //        sone.setBitrate(mdf.getBitrate().get());
         sone.setFramesize(afw.getFrameSize().get());
 //        sone.setFramesize(mdf.getFramesize().get());
@@ -59,7 +60,7 @@ public class SongOne<T> {
 //        sone.setOutputChannels(mdf.getOutputChannels().get());
         sone.setOutputFrequency(((int)afw.getSampleRate().get()));
 //        sone.setOutputFrequency(mdf.getOutputFrequency().get());
-        sone.setVbr(Boolean.getBoolean(afw.getProperties().get("vbr").toString()));
+        sone.setVbr(Boolean.parseBoolean(afw.getProperties().get("vbr").toString()));
 //        sone.setVbr(mdf.isVbr());
 
         Tags tags = new Tags();
