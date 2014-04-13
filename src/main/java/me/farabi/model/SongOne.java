@@ -6,6 +6,7 @@ import com.google.code.morphia.annotations.Index;
 import com.google.code.morphia.annotations.Indexes;
 import me.farabi.AudioFormatWritable;
 import me.farabi.MDFWritable;
+import org.apache.hadoop.io.Text;
 
 /**
  * Farabi
@@ -52,7 +53,8 @@ public class SongOne<T> {
         SongOne sone = new SongOne();
         AudioFormatWritable afw = mdf.getAudioFormatWritable();
 
-        sone.setBitrate(Integer.parseInt(afw.getProperties().get("bitrate").toString()));
+
+        sone.setBitrate(Integer.parseInt(afw.getProperties().get(new Text("bitrate")).toString()));
 //        sone.setBitrate(mdf.getBitrate().get());
         sone.setFramesize(afw.getFrameSize().get());
 //        sone.setFramesize(mdf.getFramesize().get());
@@ -60,7 +62,7 @@ public class SongOne<T> {
 //        sone.setOutputChannels(mdf.getOutputChannels().get());
         sone.setOutputFrequency(((int)afw.getSampleRate().get()));
 //        sone.setOutputFrequency(mdf.getOutputFrequency().get());
-        sone.setVbr(Boolean.parseBoolean(afw.getProperties().get("vbr").toString()));
+        sone.setVbr(Boolean.parseBoolean(afw.getProperties().get(new Text("vbr")).toString()));
 //        sone.setVbr(mdf.isVbr());
 
         Tags tags = new Tags();
