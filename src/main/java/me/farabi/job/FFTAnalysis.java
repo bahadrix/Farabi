@@ -223,7 +223,7 @@ public class FFTAnalysis extends Configured implements Tool {
 
     public static void main(String[] args) throws Exception {
 
-        int res = ToolRunner.run(new Configuration(), new MongoSone(), args);
+        int res = ToolRunner.run(new Configuration(), new FFTAnalysis(), args);
         System.exit(res);
 
     }
