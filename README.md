@@ -56,7 +56,7 @@ FFTAnalysis <input> <output> [-p <properties file>]
 ####Example
 ```bash
 hadoop jar target/Farabi-1.0-SNAPSHOT.jar \
-  me.farabi.job.MongoSone \
+  me.farabi.job.FFTAnalysis \
   farabi/input/all/data farabi/output \
   -p target/classes/farabi.sample.properties
 ```
