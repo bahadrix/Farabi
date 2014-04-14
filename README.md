@@ -46,7 +46,7 @@ mongodb.db=farabi
 
 ####Usage
 ```bash
-MongoSone <input> <output> [-p <properties file>]
+FFTAnalysis <input> <output> [-p <properties file>]
    <input>                 : Package data file location on HDFS
    <output>                : Output location on HDFS for logs and stuff
    -p <properties file>    : Properties file for mongodb connection info and stuff.
